@@ -41,13 +41,14 @@ public class OauthResource {
                 .seeOther(URI.create(
                         githubOauthService.getAuthorizationUrl(state.getState())
                 ))
-                .cookie(new NewCookie.Builder(OAUTH2_COOKIE)
-                        .value(state.getCookie())
-                        .expiry(Date.from(
-                                Instant.now().plus(Duration.ofMinutes(5))
-                        ))
-                        .sameSite(NewCookie.SameSite.STRICT)
-                        .build()
+                .cookie(
+                        new NewCookie.Builder(OAUTH2_COOKIE)
+                                .value(state.getCookie())
+                                .expiry(Date.from(
+                                        Instant.now().plus(Duration.ofMinutes(5))
+                                ))
+                                .sameSite(NewCookie.SameSite.STRICT)
+                                .build()
                 )
                 .build();
     }
