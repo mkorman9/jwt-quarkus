@@ -9,7 +9,7 @@ import jakarta.inject.Inject;
 @ApplicationScoped
 public class GithubOauthService {
     @Inject
-    OauthService oauthService;
+    OauthStateService oauthStateService;
 
     @Inject
     AccessTokenService accessTokenService;
@@ -18,7 +18,7 @@ public class GithubOauthService {
     GithubAPI githubAPI;
 
     public OauthAuthorization beginAuthorization() {
-        var state = oauthService.generateState();
+        var state = oauthStateService.generateState();
         var url = githubAPI.getAuthorizationUrl(state.getState());
 
         return OauthAuthorization.builder()
@@ -28,7 +28,7 @@ public class GithubOauthService {
     }
 
     public AccessToken finishAuthorization(String code, String state, String cookie) {
-        if (!oauthService.validateState(state, cookie)) {
+        if (!oauthStateService.validateState(state, cookie)) {
             throw new OauthStateValidationException();
         }
 

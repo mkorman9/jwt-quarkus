@@ -15,7 +15,7 @@ import java.util.Set;
 
 @ApplicationScoped
 @Slf4j
-public class OauthService {
+public class OauthStateService {
     private static final String STATE_AUDIENCE = "jwt-quarkus/oauth-state";
 
     @Inject
@@ -27,7 +27,7 @@ public class OauthService {
     private final JWTAuthContextInfo authContextInfo;
 
     @Inject
-    public OauthService(JWTAuthContextInfo originalContextInfo) {
+    public OauthStateService(JWTAuthContextInfo originalContextInfo) {
         this.authContextInfo = new JWTAuthContextInfo(originalContextInfo);
         this.authContextInfo.setExpectedAudience(Set.of(STATE_AUDIENCE));
     }
