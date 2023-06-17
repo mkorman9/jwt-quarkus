@@ -29,9 +29,6 @@ public class GithubOauthService {
     private static final String EMAIL_SCOPE = "user:email";
 
     @Inject
-    JWTService jwtService;
-
-    @Inject
     ObjectMapper objectMapper;
 
     private final OAuth20Service service;
@@ -48,19 +45,15 @@ public class GithubOauthService {
                 .build(GitHubApi.instance());
     }
 
-    public String getAuthorizationUrl() {
+    public String getAuthorizationUrl(String state) {
         return service.createAuthorizationUrlBuilder()
-                .state(jwtService.generateOauthState())
+                .state(state)
                 .scope(EMAIL_SCOPE)
                 .build();
     }
 
     @SneakyThrows
-    public Optional<OAuth2AccessToken> retrieveAccessToken(String code, String state) {
-        if (!jwtService.validateOauthState(state)) {
-            return Optional.empty();
-        }
-
+    public Optional<OAuth2AccessToken> retrieveAccessToken(String code) {
         try {
             return Optional.of(service.getAccessToken(code));
         } catch (OAuthException e) {
