@@ -1,9 +1,9 @@
 package com.github.mkorman9.jwtquarkus.resource;
 
 import com.github.mkorman9.jwtquarkus.dto.AccessToken;
-import com.github.mkorman9.jwtquarkus.service.AccessTokenService;
+import com.github.mkorman9.jwtquarkus.exception.OauthFlowException;
+import com.github.mkorman9.jwtquarkus.exception.OauthStateValidationException;
 import com.github.mkorman9.jwtquarkus.service.GithubOauthService;
-import com.github.mkorman9.jwtquarkus.service.OauthService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -24,26 +24,18 @@ public class OauthResource {
     private static final String OAUTH2_COOKIE = "oauth2_cookie";
 
     @Inject
-    OauthService oauthService;
-
-    @Inject
-    AccessTokenService accessTokenService;
-
-    @Inject
     GithubOauthService githubOauthService;
 
     @GET
     @Path("/auth")
     public Response authorize() {
-        var state = oauthService.generateState();
+        var auth = githubOauthService.beginAuthorization();
 
         return Response
-                .seeOther(URI.create(
-                        githubOauthService.getAuthorizationUrl(state.getState())
-                ))
+                .seeOther(URI.create(auth.getUrl()))
                 .cookie(
                         new NewCookie.Builder(OAUTH2_COOKIE)
-                                .value(state.getCookie())
+                                .value(auth.getState().getCookie())
                                 .expiry(Date.from(
                                         Instant.now().plus(Duration.ofMinutes(5))
                                 ))
@@ -65,18 +57,13 @@ public class OauthResource {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
 
-        if (!oauthService.validateState(state.get(), cookie.get())) {
+        AccessToken token;
+
+        try {
+            token = githubOauthService.finishAuthorization(code.get(), state.get(), cookie.get());
+        } catch (OauthStateValidationException | OauthFlowException e) {
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         }
-
-        var maybeAccessToken = githubOauthService.retrieveAccessToken(code.get());
-        if (maybeAccessToken.isEmpty()) {
-            throw new WebApplicationException(Response.Status.UNAUTHORIZED);
-        }
-
-        var accessToken = maybeAccessToken.get();
-        var userInfo = githubOauthService.retrieveUserInfo(accessToken);
-        var token = accessTokenService.generate(userInfo.getName());
 
         return Response
                 .ok("OK")
