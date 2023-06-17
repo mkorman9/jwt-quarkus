@@ -48,6 +48,7 @@ public class OauthResource {
                                         Instant.now().plus(Duration.ofMinutes(5))
                                 ))
                                 .sameSite(NewCookie.SameSite.STRICT)
+                                .httpOnly(true)
                                 .build()
                 )
                 .build();
