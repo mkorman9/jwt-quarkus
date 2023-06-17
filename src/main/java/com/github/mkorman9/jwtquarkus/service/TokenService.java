@@ -10,6 +10,7 @@ import java.util.List;
 public class TokenService {
     public String generate() {
         return Jwt.issuer("jwt-quarkus")
+                .audience("jwt-quarkus/access")
                 .subject("michal")
                 .groups(new HashSet<>(List.of("users")))
                 .sign();
