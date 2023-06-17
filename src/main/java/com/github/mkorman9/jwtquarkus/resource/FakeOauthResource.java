@@ -23,7 +23,7 @@ public class FakeOauthResource {
 
     @GET
     @Path("/callback")
-    public String getNewState(@RestQuery("state") Optional<String> state) {
+    public String callback(@RestQuery("state") Optional<String> state) {
         if (state.isEmpty()) {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
