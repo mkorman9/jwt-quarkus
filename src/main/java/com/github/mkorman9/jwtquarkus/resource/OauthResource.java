@@ -56,7 +56,7 @@ public class OauthResource {
 
     @GET
     @Path("/callback")
-    public AccessToken callback(
+    public Response callback(
             @RestQuery Optional<String> code,
             @RestQuery Optional<String> state,
             @RestCookie(OAUTH2_COOKIE) Optional<String> cookie
@@ -76,7 +76,17 @@ public class OauthResource {
 
         var accessToken = maybeAccessToken.get();
         var userInfo = githubOauthService.retrieveUserInfo(accessToken);
+        var token = accessTokenService.generate(userInfo.getName());
 
-        return accessTokenService.generate(userInfo.getName());
+        return Response
+                .ok("OK")
+                .cookie(
+                        new NewCookie.Builder("access_token")
+                                .value(token.getToken())
+                                .sameSite(NewCookie.SameSite.STRICT)
+                                .httpOnly(true)
+                                .build()
+                )
+                .build();
     }
 }
