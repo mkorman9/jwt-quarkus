@@ -24,6 +24,6 @@ public class HelloWorldResource {
     @Path("/token")
     @PermitAll
     public String getAccessToken() {
-        return jwtService.generateAccessToken();
+        return jwtService.generateAccessToken("admin");
     }
 }

@@ -29,10 +29,10 @@ public class JWTService {
         this.oauthStateAuthContextInfo.setExpectedAudience(Set.of(OAUTH_STATE_AUDIENCE));
     }
 
-    public String generateAccessToken() {
+    public String generateAccessToken(String subject) {
         return Jwt.issuer(ISSUER)
                 .audience(ACCESS_TOKEN_AUDIENCE)
-                .subject("michal")
+                .subject(subject)
                 .groups(Set.of("users"))
                 .sign();
     }

@@ -21,6 +21,8 @@ dependencies {
     implementation 'io.quarkus:quarkus-smallrye-jwt'
     implementation 'io.quarkus:quarkus-smallrye-jwt-build'
 
+    implementation 'com.github.scribejava:scribejava-apis:8.3.3'
+
     testImplementation 'io.quarkus:quarkus-junit5'
 }
 
