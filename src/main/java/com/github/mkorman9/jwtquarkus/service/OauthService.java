@@ -62,10 +62,11 @@ public class OauthService {
             return false;
         }
 
-        return oauthCookieService.validateCookie(OauthCookie.builder()
-                .cookie(cookie)
-                .cookieHash(cookieHash)
-                .build()
+        return oauthCookieService.validateCookie(
+                OauthCookie.builder()
+                        .cookie(cookie)
+                        .cookieHash(cookieHash)
+                        .build()
         );
     }
 }
