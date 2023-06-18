@@ -18,9 +18,7 @@ public class OauthCookieService {
 
     public OauthCookie generateCookie() {
         var cookieValue = generateRandomCookie();
-        var cookieHash = DatatypeConverter.printHexBinary(
-                DIGEST.digest(cookieValue.getBytes(StandardCharsets.US_ASCII))
-        );
+        var cookieHash = hashCookie(cookieValue);
 
         return OauthCookie.builder()
                 .cookie(cookieValue)
@@ -29,10 +27,7 @@ public class OauthCookieService {
     }
 
     public boolean validateCookie(OauthCookie cookie) {
-        var validCookieHash = DatatypeConverter.printHexBinary(
-                DIGEST.digest(cookie.getCookie().getBytes(StandardCharsets.US_ASCII))
-        );
-
+        var validCookieHash = hashCookie(cookie.getCookie());
         return validCookieHash.equals(cookie.getCookieHash());
     }
 
@@ -41,6 +36,12 @@ public class OauthCookieService {
                 .mapToObj(COOKIE_CHARSET::charAt)
                 .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
                 .toString();
+    }
+
+    private String hashCookie(String value) {
+        return DatatypeConverter.printHexBinary(
+                DIGEST.digest(value.getBytes(StandardCharsets.US_ASCII))
+        );
     }
 
     @SneakyThrows
