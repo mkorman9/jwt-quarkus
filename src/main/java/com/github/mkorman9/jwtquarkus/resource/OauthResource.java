@@ -18,6 +18,7 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
+import java.util.UUID;
 
 @Path("/oauth")
 public class OauthResource {
@@ -29,7 +30,8 @@ public class OauthResource {
     @GET
     @Path("/auth")
     public Response authorize() {
-        var auth = githubOauthService.beginAuthorization();
+        var userId = UUID.randomUUID();
+        var auth = githubOauthService.beginAuthorization(userId);
 
         return Response
                 .seeOther(URI.create(auth.getUrl()))

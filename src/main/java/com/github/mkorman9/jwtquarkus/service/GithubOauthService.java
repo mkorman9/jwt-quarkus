@@ -5,8 +5,12 @@ import com.github.mkorman9.jwtquarkus.dto.OauthAuthorization;
 import com.github.mkorman9.jwtquarkus.exception.OauthStateValidationException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import lombok.extern.slf4j.Slf4j;
+
+import java.util.UUID;
 
 @ApplicationScoped
+@Slf4j
 public class GithubOauthService {
     @Inject
     OauthStateService oauthStateService;
@@ -17,8 +21,8 @@ public class GithubOauthService {
     @Inject
     GithubAPI githubAPI;
 
-    public OauthAuthorization beginAuthorization() {
-        var state = oauthStateService.generateState();
+    public OauthAuthorization beginAuthorization(UUID userId) {
+        var state = oauthStateService.generateState(userId);
         var url = githubAPI.getAuthorizationUrl(state.getState());
 
         return OauthAuthorization.builder()
@@ -28,13 +32,16 @@ public class GithubOauthService {
     }
 
     public AccessToken finishAuthorization(String code, String state, String cookie) {
-        if (!oauthStateService.validateState(state, cookie)) {
+        var validation = oauthStateService.validateState(state, cookie);
+        if (!validation.isValid()) {
             throw new OauthStateValidationException();
         }
 
         var githubAccessToken = githubAPI.retrieveAccessToken(code);
         var userInfo = githubAPI.retrieveUserInfo(githubAccessToken);
 
-        return accessTokenService.generate(userInfo.getName());
+        log.info("User {} authorized as {}", validation.getUserId().toString(), userInfo.getName());
+
+        return accessTokenService.generate(validation.getUserId().toString());
     }
 }
