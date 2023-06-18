@@ -19,6 +19,7 @@ public class AccessTokenService {
 
         return AccessToken.builder()
                 .token(token)
+                .subject(subject)
                 .build();
     }
 }

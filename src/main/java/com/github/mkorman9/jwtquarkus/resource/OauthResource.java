@@ -68,7 +68,7 @@ public class OauthResource {
         }
 
         return Response
-                .ok("OK")
+                .ok(token.getSubject())
                 .cookie(
                         new NewCookie.Builder("access_token")
                                 .value(token.getToken())

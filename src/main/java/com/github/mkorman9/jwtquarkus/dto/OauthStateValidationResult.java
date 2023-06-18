@@ -11,7 +11,7 @@ import java.util.UUID;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OauthStateValidation {
+public class OauthStateValidationResult {
     private boolean valid;
 
     private UUID userId;

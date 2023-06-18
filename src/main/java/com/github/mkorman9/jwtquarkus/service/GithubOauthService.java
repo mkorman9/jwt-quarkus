@@ -32,21 +32,22 @@ public class GithubOauthService {
     }
 
     public AccessToken finishAuthorization(String code, String state, String cookie) {
-        var validation = oauthStateService.validateState(state, cookie);
-        if (!validation.isValid()) {
+        var validationResult = oauthStateService.validateState(state, cookie);
+        if (!validationResult.isValid()) {
             throw new OauthStateValidationException();
         }
 
         var githubAccessToken = githubAPI.retrieveAccessToken(code);
         var userInfo = githubAPI.retrieveUserInfo(githubAccessToken);
+        var userId = validationResult.getUserId().toString();
 
         log.info(
                 "User {} authorized as {} ({})",
-                validation.getUserId().toString(),
+                userId,
                 userInfo.getName(),
                 userInfo.getEmail()
         );
 
-        return accessTokenService.generate(validation.getUserId().toString());
+        return accessTokenService.generate(userId);
     }
 }

@@ -11,4 +11,6 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class AccessToken {
     private String token;
+
+    private String subject;
 }

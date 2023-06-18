@@ -2,7 +2,7 @@ package com.github.mkorman9.jwtquarkus.service;
 
 import com.github.mkorman9.jwtquarkus.dto.OauthCookie;
 import com.github.mkorman9.jwtquarkus.dto.OauthState;
-import com.github.mkorman9.jwtquarkus.dto.OauthStateValidation;
+import com.github.mkorman9.jwtquarkus.dto.OauthStateValidationResult;
 import io.smallrye.jwt.auth.principal.JWTAuthContextInfo;
 import io.smallrye.jwt.auth.principal.JWTParser;
 import io.smallrye.jwt.auth.principal.ParseException;
@@ -49,21 +49,21 @@ public class OauthStateService {
                 .build();
     }
 
-    public OauthStateValidation validateState(String state, String cookie) {
+    public OauthStateValidationResult validateState(String state, String cookie) {
         JsonWebToken token;
 
         try {
             token = jwtParser.parse(state, authContextInfo);
         } catch (ParseException e) {
             log.error("Token parsing error", e);
-            return OauthStateValidation.builder()
+            return OauthStateValidationResult.builder()
                     .valid(false)
                     .build();
         }
 
         var cookieHash = token.<String>getClaim("cookie");
         if (cookieHash == null) {
-            return OauthStateValidation.builder()
+            return OauthStateValidationResult.builder()
                     .valid(false)
                     .build();
         }
@@ -73,12 +73,12 @@ public class OauthStateService {
                 .cookieHash(cookieHash)
                 .build();
         if (!oauthCookieService.validateCookie(cookieToValidate)) {
-            return OauthStateValidation.builder()
+            return OauthStateValidationResult.builder()
                     .valid(false)
                     .build();
         }
 
-        return OauthStateValidation.builder()
+        return OauthStateValidationResult.builder()
                 .valid(true)
                 .userId(UUID.fromString(token.getSubject()))
                 .build();
