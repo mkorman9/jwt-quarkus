@@ -5,16 +5,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.Instant;
-
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class AccessToken {
-    private String token;
+public class TokenResponse {
+    private String accessToken;
 
-    private String subject;
+    private String refreshToken;
 
-    private Instant expiresAt;
+    private long expiresAt;
 }

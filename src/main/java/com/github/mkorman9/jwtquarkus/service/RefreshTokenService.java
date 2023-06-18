@@ -11,13 +11,18 @@ import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.Period;
+import java.time.ZoneOffset;
+import java.time.temporal.TemporalAmount;
 import java.util.Set;
 
 @ApplicationScoped
 @Slf4j
 public class RefreshTokenService {
     private static final String REFRESH_AUDIENCE = "jwt-quarkus/refresh";
-    private static final int REFRESH_TOKEN_DURATION = 315360000;  // 10 years
+    private static final TemporalAmount REFRESH_TOKEN_DURATION = Period.ofYears(10);
 
     @Inject
     JWTParser jwtParser;
@@ -43,7 +48,7 @@ public class RefreshTokenService {
         var refreshToken = Jwt.issuer("jwt-quarkus")
                 .audience(REFRESH_AUDIENCE)
                 .subject(tokenId)
-                .expiresIn(REFRESH_TOKEN_DURATION)
+                .expiresAt(LocalDateTime.now().plus(REFRESH_TOKEN_DURATION).toInstant(ZoneOffset.UTC))
                 .sign();
 
         return RefreshToken.builder()
