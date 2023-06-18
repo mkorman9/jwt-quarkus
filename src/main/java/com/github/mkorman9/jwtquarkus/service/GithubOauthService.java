@@ -40,7 +40,12 @@ public class GithubOauthService {
         var githubAccessToken = githubAPI.retrieveAccessToken(code);
         var userInfo = githubAPI.retrieveUserInfo(githubAccessToken);
 
-        log.info("User {} authorized as {}", validation.getUserId().toString(), userInfo.getName());
+        log.info(
+                "User {} authorized as {} ({})",
+                validation.getUserId().toString(),
+                userInfo.getName(),
+                userInfo.getEmail()
+        );
 
         return accessTokenService.generate(validation.getUserId().toString());
     }
