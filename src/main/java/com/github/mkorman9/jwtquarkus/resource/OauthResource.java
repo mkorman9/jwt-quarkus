@@ -61,7 +61,7 @@ public class OauthResource {
     @GET
     @Path("/connect-account")
     public Response connectAccount(
-            @RestCookie(ACCESS_TOKEN_COOKIE) Optional<String> accessToken
+            @RestQuery("accessToken") Optional<String> accessToken
     ) {
         if (accessToken.isEmpty()) {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);

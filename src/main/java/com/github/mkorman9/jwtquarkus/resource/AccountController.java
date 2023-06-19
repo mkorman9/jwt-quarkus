@@ -13,8 +13,8 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
-@Path("/token")
-public class TokenController {
+@Path("/account")
+public class AccountController {
     @Inject
     AccountService accountService;
 
@@ -25,7 +25,8 @@ public class TokenController {
     RefreshTokenService refreshTokenService;
 
     @GET
-    public TokenResponse getToken() {
+    @Path("/new")
+    public TokenResponse newAccount() {
         var userId = accountService.registerAccount();
 
         var accessToken = accessTokenService.generate(userId);
@@ -39,7 +40,7 @@ public class TokenController {
     }
 
     @PUT
-    @Path("/refresh")
+    @Path("/token/refresh")
     public TokenResponse refreshToken(@NotNull TokenRefreshPayload payload) {
         var result = refreshTokenService.refresh(payload.getRefreshToken(), payload.getAccessToken());
         if (!result.isValid()) {
