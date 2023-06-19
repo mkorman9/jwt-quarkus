@@ -30,34 +30,54 @@ public class OauthResource {
     GithubOauthService githubOauthService;
 
     @GET
-    @Path("/auth")
-    public Response authorize(
+    @Path("/login")
+    public Response login() {
+        var auth = githubOauthService.beginAccountLogin();
+
+        return Response
+                .seeOther(URI.create(auth.getUrl()))
+                .cookie(
+                        new NewCookie.Builder(OAUTH2_COOKIE)
+                                .value(auth.getState().getCookie())
+                                .expiry(Date.from(
+                                        Instant.now().plus(Duration.ofMinutes(5))
+                                ))
+                                .sameSite(NewCookie.SameSite.STRICT)
+                                .httpOnly(true)
+                                .build()
+                )
+                .build();
+    }
+
+    @GET
+    @Path("/connect-account")
+    public Response connectAccount(
             @RestCookie(ACCESS_TOKEN_COOKIE) Optional<String> accessToken
     ) {
-        try {
-            OauthAuthorization auth;
-            if (accessToken.isPresent()) {
-                auth = githubOauthService.beginAccountConnecting(accessToken.get());
-            } else {
-                auth = githubOauthService.beginAccountLogin();
-            }
+        if (accessToken.isEmpty()) {
+            throw new WebApplicationException(Response.Status.BAD_REQUEST);
+        }
 
-            return Response
-                    .seeOther(URI.create(auth.getUrl()))
-                    .cookie(
-                            new NewCookie.Builder(OAUTH2_COOKIE)
-                                    .value(auth.getState().getCookie())
-                                    .expiry(Date.from(
-                                            Instant.now().plus(Duration.ofMinutes(5))
-                                    ))
-                                    .sameSite(NewCookie.SameSite.STRICT)
-                                    .httpOnly(true)
-                                    .build()
-                    )
-                    .build();
+        OauthAuthorization auth;
+        try {
+            auth = githubOauthService.beginAccountConnecting(accessToken.get());
         } catch (AccessTokenValidationException e) {
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         }
+
+        return Response
+                .seeOther(URI.create(auth.getUrl()))
+                .cookie(
+                        new NewCookie.Builder(OAUTH2_COOKIE)
+                                .value(auth.getState().getCookie())
+                                .expiry(Date.from(
+                                        Instant.now().plus(Duration.ofMinutes(5))
+                                ))
+                                .sameSite(NewCookie.SameSite.STRICT)
+                                .httpOnly(true)
+                                .build()
+                )
+                .build();
     }
 
     @GET
