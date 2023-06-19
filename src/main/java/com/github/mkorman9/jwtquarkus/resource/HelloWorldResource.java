@@ -11,6 +11,6 @@ public class HelloWorldResource {
     @GET
     @Authenticated
     public String getHelloMessage(@Context JsonWebToken jwt) {
-        return String.format("Hello %s (%s)", jwt.getName(), String.join(",", jwt.getGroups()));
+        return String.format("Hello %s", jwt.getName());
     }
 }
