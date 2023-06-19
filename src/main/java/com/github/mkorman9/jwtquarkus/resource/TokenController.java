@@ -3,6 +3,7 @@ package com.github.mkorman9.jwtquarkus.resource;
 import com.github.mkorman9.jwtquarkus.dto.TokenRefreshPayload;
 import com.github.mkorman9.jwtquarkus.dto.TokenResponse;
 import com.github.mkorman9.jwtquarkus.service.AccessTokenService;
+import com.github.mkorman9.jwtquarkus.service.AccountService;
 import com.github.mkorman9.jwtquarkus.service.RefreshTokenService;
 import io.smallrye.common.constraint.NotNull;
 import jakarta.inject.Inject;
@@ -12,10 +13,11 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
-import java.util.UUID;
-
 @Path("/token")
 public class TokenController {
+    @Inject
+    AccountService accountService;
+
     @Inject
     AccessTokenService accessTokenService;
 
@@ -24,7 +26,7 @@ public class TokenController {
 
     @GET
     public TokenResponse getToken() {
-        var userId = UUID.randomUUID();
+        var userId = accountService.registerAccount();
 
         var accessToken = accessTokenService.generate(userId);
         var refreshToken = refreshTokenService.generate(accessToken);

@@ -3,6 +3,8 @@ package com.github.mkorman9.jwtquarkus.resource;
 import com.github.mkorman9.jwtquarkus.dto.AccessToken;
 import com.github.mkorman9.jwtquarkus.dto.OauthAuthorization;
 import com.github.mkorman9.jwtquarkus.exception.AccessTokenValidationException;
+import com.github.mkorman9.jwtquarkus.exception.GithubAccountAlreadyUsedException;
+import com.github.mkorman9.jwtquarkus.exception.GithubAccountNotFoundException;
 import com.github.mkorman9.jwtquarkus.exception.OauthFlowException;
 import com.github.mkorman9.jwtquarkus.exception.OauthStateValidationException;
 import com.github.mkorman9.jwtquarkus.service.GithubOauthService;
@@ -95,8 +97,10 @@ public class OauthResource {
 
         try {
             token = githubOauthService.finishAuthorization(code.get(), state.get(), cookie.get());
-        } catch (OauthStateValidationException | OauthFlowException e) {
+        } catch (OauthStateValidationException | OauthFlowException | GithubAccountNotFoundException e) {
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
+        } catch (GithubAccountAlreadyUsedException e) {
+            throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
 
         return Response
