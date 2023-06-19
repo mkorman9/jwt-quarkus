@@ -76,11 +76,7 @@ public class OauthStateService {
                     .build();
         }
 
-        var cookieToValidate = OauthCookie.builder()
-                .cookie(cookie)
-                .cookieHash(cookieHash)
-                .build();
-        if (!oauthCookieService.validateCookie(cookieToValidate)) {
+        if (!oauthCookieService.validateCookie(cookie, cookieHash)) {
             return OauthStateValidationResult.builder()
                     .valid(false)
                     .build();

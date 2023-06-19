@@ -26,9 +26,9 @@ public class OauthCookieService {
                 .build();
     }
 
-    public boolean validateCookie(OauthCookie cookie) {
-        var validCookieHash = hashCookie(cookie.getCookie());
-        return validCookieHash.equals(cookie.getCookieHash());
+    public boolean validateCookie(String cookie, String cookieHash) {
+        var validCookieHash = hashCookie(cookie);
+        return validCookieHash.equals(cookieHash);
     }
 
     private String generateRandomCookie() {
