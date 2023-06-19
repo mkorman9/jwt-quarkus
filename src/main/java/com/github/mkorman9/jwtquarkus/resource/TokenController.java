@@ -41,12 +41,12 @@ public class TokenController {
     @PUT
     @Path("/refresh")
     public TokenResponse refreshToken(@NotNull TokenRefreshPayload payload) {
-        var validation = refreshTokenService.validateRefreshToken(payload.getRefreshToken(), payload.getAccessToken());
-        if (!validation.isValid()) {
+        var result = refreshTokenService.refresh(payload.getRefreshToken(), payload.getAccessToken());
+        if (!result.isValid()) {
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         }
 
-        var accessToken = accessTokenService.generate(validation.getUserId());
+        var accessToken = accessTokenService.generate(result.getUserId());
         var refreshToken = refreshTokenService.generate(accessToken);
 
         return TokenResponse.builder()

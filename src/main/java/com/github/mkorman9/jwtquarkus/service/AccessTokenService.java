@@ -39,7 +39,7 @@ public class AccessTokenService {
                 .build();
     }
 
-    public UUID extractUserId(String accessToken) {
+    public AccessToken validate(String accessToken) {
         JsonWebToken token;
 
         try {
@@ -49,6 +49,10 @@ public class AccessTokenService {
             throw new AccessTokenValidationException();
         }
 
-        return UUID.fromString(token.getSubject());
+        return AccessToken.builder()
+                .token(accessToken)
+                .subject(token.getSubject())
+                .expiresAt(Instant.ofEpochMilli(token.getExpirationTime()))
+                .build();
     }
 }

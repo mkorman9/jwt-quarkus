@@ -38,9 +38,9 @@ public class GithubOauthService {
     }
 
     public OauthAuthorization beginConnectAccount(String accessToken) {
-        var userId = accessTokenService.extractUserId(accessToken);
+        var token = accessTokenService.validate(accessToken);
 
-        var state = oauthStateService.generateState(userId.toString());
+        var state = oauthStateService.generateState(token.getSubject());
         var url = githubAPI.getConnectAccountAuthorizationUrl(state.getState());
 
         return OauthAuthorization.builder()

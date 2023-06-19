@@ -60,7 +60,7 @@ public class RefreshTokenService {
                 .build();
     }
 
-    public TokenRefreshResult validateRefreshToken(String refreshToken, String accessToken) {
+    public TokenRefreshResult refresh(String refreshToken, String accessToken) {
         JsonWebToken accessTokenParsed;
         JsonWebToken refreshTokenParsed;
 
