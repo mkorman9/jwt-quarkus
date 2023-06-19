@@ -1,6 +1,7 @@
 package com.github.mkorman9.jwtquarkus.resource;
 
 import com.github.mkorman9.jwtquarkus.dto.AccessToken;
+import com.github.mkorman9.jwtquarkus.dto.GithubAuthorizationResult;
 import com.github.mkorman9.jwtquarkus.dto.OauthAuthorization;
 import com.github.mkorman9.jwtquarkus.exception.AccessTokenValidationException;
 import com.github.mkorman9.jwtquarkus.exception.GithubAccountAlreadyUsedException;
@@ -93,25 +94,42 @@ public class OauthResource {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
 
-        AccessToken token;
+        GithubAuthorizationResult result;
 
         try {
-            token = githubOauthService.finishAuthorization(code.get(), state.get(), cookie.get());
-        } catch (OauthStateValidationException | OauthFlowException | GithubAccountNotFoundException e) {
+            result = githubOauthService.finishAuthorization(code.get(), state.get(), cookie.get());
+        } catch (OauthStateValidationException | OauthFlowException e) {
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
-        } catch (GithubAccountAlreadyUsedException e) {
-            throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
 
-        return Response
-                .ok(token.getSubject())
-                .cookie(
-                        new NewCookie.Builder(ACCESS_TOKEN_COOKIE)
-                                .value(token.getToken())
-                                .sameSite(NewCookie.SameSite.STRICT)
-                                .httpOnly(true)
-                                .build()
-                )
-                .build();
+        if (result.getAction() == GithubAuthorizationResult.Action.LOGIN) {
+            AccessToken token;
+            try {
+                token = githubOauthService.loginToAccount(result.getUserInfo());
+            } catch (GithubAccountNotFoundException e) {
+                throw new WebApplicationException(Response.Status.UNAUTHORIZED);
+            }
+
+            return Response
+                    .ok(token)
+                    .cookie(
+                            new NewCookie.Builder(ACCESS_TOKEN_COOKIE)
+                                    .value(token.getToken())
+                                    .sameSite(NewCookie.SameSite.STRICT)
+                                    .httpOnly(true)
+                                    .build()
+                    )
+                    .build();
+        } else {
+            try {
+                githubOauthService.connectAccount(result.getUserInfo(), result.getUserId());
+            } catch (GithubAccountAlreadyUsedException e) {
+                throw new WebApplicationException(Response.Status.BAD_REQUEST);
+            }
+
+            return Response
+                    .ok("OK")
+                    .build();
+        }
     }
 }
