@@ -1,7 +1,6 @@
 package com.github.mkorman9.jwtquarkus.resource;
 
 import com.github.mkorman9.jwtquarkus.dto.AccessToken;
-import com.github.mkorman9.jwtquarkus.dto.GithubAuthorizationResult;
 import com.github.mkorman9.jwtquarkus.dto.OauthAuthorization;
 import com.github.mkorman9.jwtquarkus.exception.AccessTokenValidationException;
 import com.github.mkorman9.jwtquarkus.exception.GithubAccountAlreadyUsedException;
@@ -35,7 +34,7 @@ public class OauthResource {
     @GET
     @Path("/login")
     public Response login() {
-        var auth = githubOauthService.beginAccountLogin();
+        var auth = githubOauthService.beginLogin();
 
         return Response
                 .seeOther(URI.create(auth.getUrl()))
@@ -63,7 +62,7 @@ public class OauthResource {
 
         OauthAuthorization auth;
         try {
-            auth = githubOauthService.beginAccountConnecting(accessToken.get());
+            auth = githubOauthService.beginConnectAccount(accessToken.get());
         } catch (AccessTokenValidationException e) {
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         }
@@ -84,8 +83,8 @@ public class OauthResource {
     }
 
     @GET
-    @Path("/callback")
-    public Response callback(
+    @Path("/callback/login")
+    public Response loginCallback(
             @RestQuery Optional<String> code,
             @RestQuery Optional<String> state,
             @RestCookie(OAUTH2_COOKIE) Optional<String> cookie
@@ -94,42 +93,46 @@ public class OauthResource {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
 
-        GithubAuthorizationResult result;
-
+        AccessToken token;
         try {
-            result = githubOauthService.finishAuthorization(code.get(), state.get(), cookie.get());
-        } catch (OauthStateValidationException | OauthFlowException e) {
+            token = githubOauthService.finishLogin(code.get(), state.get(), cookie.get());
+        } catch (OauthStateValidationException | OauthFlowException | GithubAccountNotFoundException e) {
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         }
 
-        if (result.getAction() == GithubAuthorizationResult.Action.LOGIN) {
-            AccessToken token;
-            try {
-                token = githubOauthService.loginToAccount(result.getUserInfo());
-            } catch (GithubAccountNotFoundException e) {
-                throw new WebApplicationException(Response.Status.UNAUTHORIZED);
-            }
+        return Response
+                .ok(token)
+                .cookie(
+                        new NewCookie.Builder(ACCESS_TOKEN_COOKIE)
+                                .value(token.getToken())
+                                .sameSite(NewCookie.SameSite.STRICT)
+                                .httpOnly(true)
+                                .build()
+                )
+                .build();
+    }
 
-            return Response
-                    .ok(token)
-                    .cookie(
-                            new NewCookie.Builder(ACCESS_TOKEN_COOKIE)
-                                    .value(token.getToken())
-                                    .sameSite(NewCookie.SameSite.STRICT)
-                                    .httpOnly(true)
-                                    .build()
-                    )
-                    .build();
-        } else {
-            try {
-                githubOauthService.connectAccount(result.getUserInfo(), result.getUserId());
-            } catch (GithubAccountAlreadyUsedException e) {
-                throw new WebApplicationException(Response.Status.BAD_REQUEST);
-            }
-
-            return Response
-                    .ok("OK")
-                    .build();
+    @GET
+    @Path("/callback/connect-account")
+    public Response connectAccountCallback(
+            @RestQuery Optional<String> code,
+            @RestQuery Optional<String> state,
+            @RestCookie(OAUTH2_COOKIE) Optional<String> cookie
+    ) {
+        if (code.isEmpty() || state.isEmpty() || cookie.isEmpty()) {
+            throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
+
+        try {
+            githubOauthService.finishConnectAccount(code.get(), state.get(), cookie.get());
+        } catch (OauthStateValidationException | OauthFlowException e) {
+            throw new WebApplicationException(Response.Status.UNAUTHORIZED);
+        } catch (GithubAccountAlreadyUsedException e) {
+            throw new WebApplicationException(Response.Status.BAD_REQUEST);
+        }
+
+        return Response
+                .ok("OK")
+                .build();
     }
 }

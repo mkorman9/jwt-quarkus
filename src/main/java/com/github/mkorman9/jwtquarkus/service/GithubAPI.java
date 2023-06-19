@@ -33,22 +33,35 @@ public class GithubAPI {
     @Inject
     ObjectMapper objectMapper;
 
-    private final OAuth20Service service;
+    private final OAuth20Service loginService;
+    private final OAuth20Service connectAccountService;
 
     @Inject
     public GithubAPI(
             @ConfigProperty(name="oauth2.clientId") String clientId,
             @ConfigProperty(name="oauth2.clientSecret") String clientSecret,
-            @ConfigProperty(name="oauth2.redirectUrl") String redirectUrl
+            @ConfigProperty(name="oauth2.loginRedirectUrl") String loginRedirectUrl,
+            @ConfigProperty(name="oauth2.connectAccountRedirectUrl") String connectAccountRedirectUrl
     ) {
-        this.service = new ServiceBuilder(clientId)
+        this.loginService = new ServiceBuilder(clientId)
                 .apiSecret(clientSecret)
-                .callback(redirectUrl)
+                .callback(loginRedirectUrl)
+                .build(GitHubApi.instance());
+        this.connectAccountService = new ServiceBuilder(clientId)
+                .apiSecret(clientSecret)
+                .callback(connectAccountRedirectUrl)
                 .build(GitHubApi.instance());
     }
 
-    public String getAuthorizationUrl(String state) {
-        return service.createAuthorizationUrlBuilder()
+    public String getLoginAuthorizationUrl(String state) {
+        return loginService.createAuthorizationUrlBuilder()
+                .state(state)
+                .scope(EMAIL_SCOPE)
+                .build();
+    }
+
+    public String getConnectAccountAuthorizationUrl(String state) {
+        return connectAccountService.createAuthorizationUrlBuilder()
                 .state(state)
                 .scope(EMAIL_SCOPE)
                 .build();
@@ -57,7 +70,7 @@ public class GithubAPI {
     @SneakyThrows
     public OAuth2AccessToken retrieveAccessToken(String code) {
         try {
-            return service.getAccessToken(code);
+            return loginService.getAccessToken(code);
         } catch (OAuthException e) {
             log.error("Error while retrieving GitHub access token", e);
             throw new OauthFlowException();
@@ -93,9 +106,9 @@ public class GithubAPI {
 
     private GithubUserInfoResponse retrieveUserInfoResponse(OAuth2AccessToken accessToken) {
         var request = new OAuthRequest(Verb.GET, USER_INFO_URL);
-        service.signRequest(accessToken, request);
+        loginService.signRequest(accessToken, request);
 
-        try (var response = service.execute(request)) {
+        try (var response = loginService.execute(request)) {
             var body = response.getBody();
             return objectMapper.readValue(body, GithubUserInfoResponse.class);
         } catch (IOException | ExecutionException | InterruptedException e) {
@@ -106,9 +119,9 @@ public class GithubAPI {
 
     private List<GithubUserEmailResponse> retrieveUserEmailResponses(OAuth2AccessToken accessToken) {
         var request = new OAuthRequest(Verb.GET, USER_EMAIL_URL);
-        service.signRequest(accessToken, request);
+        loginService.signRequest(accessToken, request);
 
-        try (var response = service.execute(request)) {
+        try (var response = loginService.execute(request)) {
             var body = response.getBody();
             return objectMapper.readValue(body, new TypeReference<>(){});
         } catch (IOException | ExecutionException | InterruptedException e) {
