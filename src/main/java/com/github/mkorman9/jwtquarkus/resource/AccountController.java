@@ -1,5 +1,6 @@
 package com.github.mkorman9.jwtquarkus.resource;
 
+import com.github.mkorman9.jwtquarkus.dto.AccountResponse;
 import com.github.mkorman9.jwtquarkus.dto.TokenRefreshPayload;
 import com.github.mkorman9.jwtquarkus.dto.TokenResponse;
 import com.github.mkorman9.jwtquarkus.service.AccessTokenService;
@@ -26,16 +27,21 @@ public class AccountController {
 
     @GET
     @Path("/new")
-    public TokenResponse newAccount() {
+    public AccountResponse newAccount() {
         var userId = accountService.registerAccount();
 
         var accessToken = accessTokenService.generate(userId);
         var refreshToken = refreshTokenService.generate(accessToken);
 
-        return TokenResponse.builder()
+        var tokenResponse = TokenResponse.builder()
                 .accessToken(accessToken.getToken())
                 .refreshToken(refreshToken.getToken())
                 .expiresAt(accessToken.getExpiresAt().toEpochMilli())
+                .build();
+
+        return AccountResponse.builder()
+                .id(userId)
+                .token(tokenResponse)
                 .build();
     }
 
