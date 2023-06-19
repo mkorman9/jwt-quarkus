@@ -38,11 +38,15 @@ public class OauthStateService {
         this.authContextInfo.setExpectedAudience(Set.of(STATE_AUDIENCE));
     }
 
-    public OauthState generateState(Optional<UUID> userId) {
+    public OauthState generateState() {
+        return generateState("");
+    }
+
+    public OauthState generateState(String subject) {
         var cookie = oauthCookieService.generateCookie();
         var state = Jwt.issuer("jwt-quarkus")
                 .audience(STATE_AUDIENCE)
-                .subject(userId.map(UUID::toString).orElse(""))
+                .subject(subject)
                 .claim("cookie", cookie.getCookieHash())
                 .expiresIn(Instant.now().plus(STATE_DURATION).toEpochMilli())
                 .sign();

@@ -10,7 +10,6 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 
-import java.util.Optional;
 import java.util.UUID;
 
 @ApplicationScoped
@@ -29,7 +28,7 @@ public class GithubOauthService {
     AccountService accountService;
 
     public OauthAuthorization beginLogin() {
-        var state = oauthStateService.generateState(Optional.empty());
+        var state = oauthStateService.generateState();
         var url = githubAPI.getLoginAuthorizationUrl(state.getState());
 
         return OauthAuthorization.builder()
@@ -41,7 +40,7 @@ public class GithubOauthService {
     public OauthAuthorization beginConnectAccount(String accessToken) {
         var userId = accessTokenService.extractUserId(accessToken);
 
-        var state = oauthStateService.generateState(Optional.of(userId));
+        var state = oauthStateService.generateState(userId.toString());
         var url = githubAPI.getConnectAccountAuthorizationUrl(state.getState());
 
         return OauthAuthorization.builder()
