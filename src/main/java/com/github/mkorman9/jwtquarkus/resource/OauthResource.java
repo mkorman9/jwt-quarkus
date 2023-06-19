@@ -2,12 +2,14 @@ package com.github.mkorman9.jwtquarkus.resource;
 
 import com.github.mkorman9.jwtquarkus.dto.AccessToken;
 import com.github.mkorman9.jwtquarkus.dto.OauthAuthorization;
+import com.github.mkorman9.jwtquarkus.dto.TokenResponse;
 import com.github.mkorman9.jwtquarkus.exception.AccessTokenValidationException;
 import com.github.mkorman9.jwtquarkus.exception.GithubAccountAlreadyUsedException;
 import com.github.mkorman9.jwtquarkus.exception.GithubAccountNotFoundException;
 import com.github.mkorman9.jwtquarkus.exception.OauthFlowException;
 import com.github.mkorman9.jwtquarkus.exception.OauthStateValidationException;
 import com.github.mkorman9.jwtquarkus.service.GithubOauthService;
+import com.github.mkorman9.jwtquarkus.service.RefreshTokenService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -27,9 +29,14 @@ import java.util.Optional;
 public class OauthResource {
     private static final String OAUTH2_COOKIE = "oauth2_cookie";
     private static final String ACCESS_TOKEN_COOKIE = "access_token";
+    private static final String REFRESH_TOKEN_COOKIE = "refresh_token";
+    private static final String EXPIRES_AT_COOKIE = "expires_at";
 
     @Inject
     GithubOauthService githubOauthService;
+
+    @Inject
+    RefreshTokenService refreshTokenService;
 
     @GET
     @Path("/login")
@@ -100,11 +107,28 @@ public class OauthResource {
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         }
 
+        var refreshToken = refreshTokenService.generate(token);
+        var response = TokenResponse.builder()
+                .accessToken(token.getToken())
+                .refreshToken(refreshToken.getToken())
+                .expiresAt(token.getExpiresAt().toEpochMilli())
+                .build();
+
         return Response
-                .ok(token)
+                .ok(response)
                 .cookie(
                         new NewCookie.Builder(ACCESS_TOKEN_COOKIE)
                                 .value(token.getToken())
+                                .sameSite(NewCookie.SameSite.STRICT)
+                                .httpOnly(true)
+                                .build(),
+                        new NewCookie.Builder(REFRESH_TOKEN_COOKIE)
+                                .value(refreshToken.getToken())
+                                .sameSite(NewCookie.SameSite.STRICT)
+                                .httpOnly(true)
+                                .build(),
+                        new NewCookie.Builder(EXPIRES_AT_COOKIE)
+                                .value(Long.toString(token.getExpiresAt().toEpochMilli()))
                                 .sameSite(NewCookie.SameSite.STRICT)
                                 .httpOnly(true)
                                 .build()
