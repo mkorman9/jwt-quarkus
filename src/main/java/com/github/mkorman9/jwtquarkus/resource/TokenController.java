@@ -12,6 +12,8 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.Response;
 
+import java.util.UUID;
+
 @Path("/token")
 public class TokenController {
     @Inject
@@ -22,7 +24,9 @@ public class TokenController {
 
     @GET
     public TokenResponse getToken() {
-        var accessToken = accessTokenService.generate("9effb409-532e-4586-bdbe-41611d41e482");
+        var userId = UUID.randomUUID();
+
+        var accessToken = accessTokenService.generate(userId);
         var refreshToken = refreshTokenService.generate(accessToken);
 
         return TokenResponse.builder()
@@ -40,7 +44,7 @@ public class TokenController {
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         }
 
-        var accessToken = accessTokenService.generate(validation.getUserId().toString());
+        var accessToken = accessTokenService.generate(validation.getUserId());
         var refreshToken = refreshTokenService.generate(accessToken);
 
         return TokenResponse.builder()

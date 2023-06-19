@@ -12,6 +12,7 @@ import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -34,11 +35,11 @@ public class OauthStateService {
         this.authContextInfo.setExpectedAudience(Set.of(STATE_AUDIENCE));
     }
 
-    public OauthState generateState(UUID userId) {
+    public OauthState generateState(Optional<UUID> userId) {
         var cookie = oauthCookieService.generateCookie();
         var state = Jwt.issuer("jwt-quarkus")
                 .audience(STATE_AUDIENCE)
-                .subject(userId.toString())
+                .subject(userId.map(UUID::toString).orElse(""))
                 .claim("cookie", cookie.getCookieHash())
                 .expiresIn(300)
                 .sign();
@@ -80,7 +81,7 @@ public class OauthStateService {
 
         return OauthStateValidationResult.builder()
                 .valid(true)
-                .userId(UUID.fromString(token.getSubject()))
+                .subject(token.getSubject())
                 .build();
     }
 }

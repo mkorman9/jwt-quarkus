@@ -1,6 +1,8 @@
 package com.github.mkorman9.jwtquarkus.resource;
 
 import com.github.mkorman9.jwtquarkus.dto.AccessToken;
+import com.github.mkorman9.jwtquarkus.dto.OauthAuthorization;
+import com.github.mkorman9.jwtquarkus.exception.AccessTokenValidationException;
 import com.github.mkorman9.jwtquarkus.exception.OauthFlowException;
 import com.github.mkorman9.jwtquarkus.exception.OauthStateValidationException;
 import com.github.mkorman9.jwtquarkus.service.GithubOauthService;
@@ -18,34 +20,44 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
-import java.util.UUID;
 
 @Path("/oauth")
 public class OauthResource {
     private static final String OAUTH2_COOKIE = "oauth2_cookie";
+    private static final String ACCESS_TOKEN_COOKIE = "access_token";
 
     @Inject
     GithubOauthService githubOauthService;
 
     @GET
     @Path("/auth")
-    public Response authorize() {
-        var userId = UUID.randomUUID();
-        var auth = githubOauthService.beginAuthorization(userId);
+    public Response authorize(
+            @RestCookie(ACCESS_TOKEN_COOKIE) Optional<String> accessToken
+    ) {
+        try {
+            OauthAuthorization auth;
+            if (accessToken.isPresent()) {
+                auth = githubOauthService.beginAccountConnecting(accessToken.get());
+            } else {
+                auth = githubOauthService.beginAccountLogin();
+            }
 
-        return Response
-                .seeOther(URI.create(auth.getUrl()))
-                .cookie(
-                        new NewCookie.Builder(OAUTH2_COOKIE)
-                                .value(auth.getState().getCookie())
-                                .expiry(Date.from(
-                                        Instant.now().plus(Duration.ofMinutes(5))
-                                ))
-                                .sameSite(NewCookie.SameSite.STRICT)
-                                .httpOnly(true)
-                                .build()
-                )
-                .build();
+            return Response
+                    .seeOther(URI.create(auth.getUrl()))
+                    .cookie(
+                            new NewCookie.Builder(OAUTH2_COOKIE)
+                                    .value(auth.getState().getCookie())
+                                    .expiry(Date.from(
+                                            Instant.now().plus(Duration.ofMinutes(5))
+                                    ))
+                                    .sameSite(NewCookie.SameSite.STRICT)
+                                    .httpOnly(true)
+                                    .build()
+                    )
+                    .build();
+        } catch (AccessTokenValidationException e) {
+            throw new WebApplicationException(Response.Status.UNAUTHORIZED);
+        }
     }
 
     @GET
@@ -70,7 +82,7 @@ public class OauthResource {
         return Response
                 .ok(token.getSubject())
                 .cookie(
-                        new NewCookie.Builder("access_token")
+                        new NewCookie.Builder(ACCESS_TOKEN_COOKIE)
                                 .value(token.getToken())
                                 .sameSite(NewCookie.SameSite.STRICT)
                                 .httpOnly(true)

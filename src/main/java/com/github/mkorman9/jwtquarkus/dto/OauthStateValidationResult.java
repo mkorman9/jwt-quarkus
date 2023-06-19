@@ -5,8 +5,6 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.UUID;
-
 @Getter
 @Builder
 @NoArgsConstructor
@@ -14,5 +12,5 @@ import java.util.UUID;
 public class OauthStateValidationResult {
     private boolean valid;
 
-    private UUID userId;
+    private String subject;
 }
