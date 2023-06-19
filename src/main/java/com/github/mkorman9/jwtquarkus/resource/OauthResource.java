@@ -18,6 +18,7 @@ import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import org.jboss.resteasy.reactive.RestCookie;
 import org.jboss.resteasy.reactive.RestQuery;
+import org.jboss.resteasy.reactive.RestResponse;
 
 import java.net.URI;
 import java.time.Duration;
@@ -40,10 +41,10 @@ public class OauthResource {
 
     @GET
     @Path("/login")
-    public Response login() {
+    public RestResponse<Object> login() {
         var auth = githubOauthService.beginLogin();
 
-        return Response
+        return RestResponse.ResponseBuilder
                 .seeOther(URI.create(auth.getUrl()))
                 .cookie(
                         new NewCookie.Builder(OAUTH2_COOKIE)
@@ -60,7 +61,7 @@ public class OauthResource {
 
     @GET
     @Path("/connect-account")
-    public Response connectAccount(
+    public RestResponse<Object> connectAccount(
             @RestQuery("accessToken") Optional<String> accessToken
     ) {
         if (accessToken.isEmpty()) {
@@ -74,7 +75,7 @@ public class OauthResource {
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         }
 
-        return Response
+        return RestResponse.ResponseBuilder
                 .seeOther(URI.create(auth.getUrl()))
                 .cookie(
                         new NewCookie.Builder(OAUTH2_COOKIE)
@@ -91,7 +92,7 @@ public class OauthResource {
 
     @GET
     @Path("/callback/login")
-    public Response loginCallback(
+    public RestResponse<TokenResponse> loginCallback(
             @RestQuery Optional<String> code,
             @RestQuery Optional<String> state,
             @RestCookie(OAUTH2_COOKIE) Optional<String> cookie
@@ -114,7 +115,7 @@ public class OauthResource {
                 .expiresAt(token.getExpiresAt().toEpochMilli())
                 .build();
 
-        return Response
+        return RestResponse.ResponseBuilder
                 .ok(response)
                 .cookie(
                         new NewCookie.Builder(ACCESS_TOKEN_COOKIE)
@@ -138,7 +139,7 @@ public class OauthResource {
 
     @GET
     @Path("/callback/connect-account")
-    public Response connectAccountCallback(
+    public String connectAccountCallback(
             @RestQuery Optional<String> code,
             @RestQuery Optional<String> state,
             @RestCookie(OAUTH2_COOKIE) Optional<String> cookie
@@ -155,8 +156,6 @@ public class OauthResource {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
 
-        return Response
-                .ok("OK")
-                .build();
+        return "OK";
     }
 }
