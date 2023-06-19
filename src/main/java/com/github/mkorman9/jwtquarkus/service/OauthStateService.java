@@ -12,6 +12,8 @@ import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -20,6 +22,7 @@ import java.util.UUID;
 @Slf4j
 public class OauthStateService {
     private static final String STATE_AUDIENCE = "jwt-quarkus/oauth-state";
+    private static final Duration STATE_DURATION = Duration.ofMinutes(5);
 
     @Inject
     JWTParser jwtParser;
@@ -41,7 +44,7 @@ public class OauthStateService {
                 .audience(STATE_AUDIENCE)
                 .subject(userId.map(UUID::toString).orElse(""))
                 .claim("cookie", cookie.getCookieHash())
-                .expiresIn(300)
+                .expiresIn(Instant.now().plus(STATE_DURATION).toEpochMilli())
                 .sign();
 
         return OauthState.builder()

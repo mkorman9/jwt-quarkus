@@ -18,6 +18,7 @@ import java.util.UUID;
 @ApplicationScoped
 @Slf4j
 public class AccessTokenService {
+    private static final String ACCESS_AUDIENCE = "jwt-quarkus/access";
     private static final TemporalAmount ACCESS_TOKEN_DURATION = Duration.ofHours(12);
 
     @Inject
@@ -26,7 +27,7 @@ public class AccessTokenService {
     public AccessToken generate(UUID userId) {
         var expiresAt = Instant.now().plus(ACCESS_TOKEN_DURATION);
         var token = Jwt.issuer("jwt-quarkus")
-                .audience("jwt-quarkus/access")
+                .audience(ACCESS_AUDIENCE)
                 .subject(userId.toString())
                 .expiresAt(expiresAt)
                 .sign();

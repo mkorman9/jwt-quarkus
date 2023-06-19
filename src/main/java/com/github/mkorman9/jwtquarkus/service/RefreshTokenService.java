@@ -12,9 +12,9 @@ import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
-import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.temporal.TemporalAmount;
 import java.util.Set;
 import java.util.UUID;
@@ -52,7 +52,7 @@ public class RefreshTokenService {
         var refreshToken = Jwt.issuer("jwt-quarkus")
                 .audience(REFRESH_AUDIENCE)
                 .subject(tokenId)
-                .expiresAt(LocalDateTime.now().plus(REFRESH_TOKEN_DURATION).toInstant(ZoneOffset.UTC))
+                .expiresAt(ZonedDateTime.now(ZoneOffset.UTC).plus(REFRESH_TOKEN_DURATION).toInstant())
                 .sign();
 
         return RefreshToken.builder()
