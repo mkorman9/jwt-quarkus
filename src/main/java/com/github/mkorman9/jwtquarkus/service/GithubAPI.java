@@ -2,9 +2,9 @@ package com.github.mkorman9.jwtquarkus.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.mkorman9.jwtquarkus.dto.GithubUserEmailResponse;
+import com.github.mkorman9.jwtquarkus.dto.payload.GithubUserEmailResponse;
 import com.github.mkorman9.jwtquarkus.dto.GithubUserInfo;
-import com.github.mkorman9.jwtquarkus.dto.GithubUserInfoResponse;
+import com.github.mkorman9.jwtquarkus.dto.payload.GithubUserInfoResponse;
 import com.github.mkorman9.jwtquarkus.exception.OauthFlowException;
 import com.github.scribejava.apis.GitHubApi;
 import com.github.scribejava.core.builder.ServiceBuilder;

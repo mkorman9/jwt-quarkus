@@ -1,8 +1,8 @@
 package com.github.mkorman9.jwtquarkus.resource;
 
-import com.github.mkorman9.jwtquarkus.dto.AccountResponse;
-import com.github.mkorman9.jwtquarkus.dto.TokenRefreshPayload;
-import com.github.mkorman9.jwtquarkus.dto.TokenResponse;
+import com.github.mkorman9.jwtquarkus.dto.payload.AccountResponse;
+import com.github.mkorman9.jwtquarkus.dto.payload.TokenRefreshPayload;
+import com.github.mkorman9.jwtquarkus.dto.payload.TokenResponse;
 import com.github.mkorman9.jwtquarkus.service.AccessTokenService;
 import com.github.mkorman9.jwtquarkus.service.AccountService;
 import com.github.mkorman9.jwtquarkus.service.RefreshTokenService;

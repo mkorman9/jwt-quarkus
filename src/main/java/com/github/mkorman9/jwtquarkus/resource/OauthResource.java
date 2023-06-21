@@ -2,7 +2,7 @@ package com.github.mkorman9.jwtquarkus.resource;
 
 import com.github.mkorman9.jwtquarkus.dto.AccessToken;
 import com.github.mkorman9.jwtquarkus.dto.OauthAuthorization;
-import com.github.mkorman9.jwtquarkus.dto.TokenResponse;
+import com.github.mkorman9.jwtquarkus.dto.payload.TokenResponse;
 import com.github.mkorman9.jwtquarkus.exception.AccessTokenValidationException;
 import com.github.mkorman9.jwtquarkus.exception.GithubAccountAlreadyUsedException;
 import com.github.mkorman9.jwtquarkus.exception.GithubAccountNotFoundException;

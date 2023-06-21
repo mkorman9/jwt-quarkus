@@ -1,4 +1,4 @@
-package com.github.mkorman9.jwtquarkus.dto;
+package com.github.mkorman9.jwtquarkus.dto.payload;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
