@@ -40,7 +40,7 @@ public class AccountController {
                 .build();
 
         return AccountResponse.builder()
-                .id(userId)
+                .id(userId.toString())
                 .token(tokenResponse)
                 .build();
     }
