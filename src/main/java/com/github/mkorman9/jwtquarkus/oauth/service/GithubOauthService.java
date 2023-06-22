@@ -91,7 +91,6 @@ public class GithubOauthService {
             throw new GithubAccountAlreadyUsedException();
         }
 
-        log.info("User {} connected account {} ({})", userId, userInfo.getName(), userInfo.getEmail());
-        accountService.connectAccount(userInfo.getId(), userId);
+        accountService.connectGithubAccount(userInfo, userId);
     }
 }

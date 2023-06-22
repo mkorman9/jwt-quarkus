@@ -1,6 +1,7 @@
 package com.github.mkorman9.jwtquarkus.accounts.service;
 
 import com.github.f4b6a3.uuid.UuidCreator;
+import com.github.mkorman9.jwtquarkus.oauth.dto.GithubUserInfo;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 
@@ -23,8 +24,10 @@ public class AccountService {
         return account;
     }
 
-    public void connectAccount(long githubId, UUID id) {
-        GITHUB_CONNECTIONS.put(githubId, id);
+    public void connectGithubAccount(GithubUserInfo userInfo, UUID id) {
+        log.info("User {} connected GitHub account {} ({})", id, userInfo.getName(), userInfo.getEmail());
+
+        GITHUB_CONNECTIONS.put(userInfo.getId(), id);
     }
 
     public UUID getByGithubId(long githubId) {
