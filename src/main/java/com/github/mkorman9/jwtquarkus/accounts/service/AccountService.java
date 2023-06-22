@@ -1,5 +1,6 @@
 package com.github.mkorman9.jwtquarkus.accounts.service;
 
+import com.github.f4b6a3.uuid.UuidCreator;
 import jakarta.enterprise.context.ApplicationScoped;
 import lombok.extern.slf4j.Slf4j;
 
@@ -14,7 +15,7 @@ public class AccountService {
     private final Map<Long, UUID> GITHUB_CONNECTIONS = new ConcurrentHashMap<>();
 
     public UUID registerAccount() {
-        var account = UUID.randomUUID();
+        var account = UuidCreator.getTimeOrderedEpoch();
         ACCOUNTS.put(account, true);
 
         log.info("Registered new account {}", account);
