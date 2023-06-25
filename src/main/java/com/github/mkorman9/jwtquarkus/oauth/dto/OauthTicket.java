@@ -11,7 +11,7 @@ import java.net.URI;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class OauthAuthorization {
+public class OauthTicket {
     private URI url;
 
     private OauthState state;

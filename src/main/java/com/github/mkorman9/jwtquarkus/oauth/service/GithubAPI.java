@@ -54,7 +54,7 @@ public class GithubAPI {
                 .build(GitHubApi.instance());
     }
 
-    public URI getLoginAuthorizationUrl(String state) {
+    public URI getLoginUrl(String state) {
         var url = loginService.createAuthorizationUrlBuilder()
                 .state(state)
                 .scope(EMAIL_SCOPE)
@@ -62,7 +62,7 @@ public class GithubAPI {
         return URI.create(url);
     }
 
-    public URI getConnectAccountAuthorizationUrl(String state) {
+    public URI getConnectAccountUrl(String state) {
         var url = connectAccountService.createAuthorizationUrlBuilder()
                 .state(state)
                 .scope(EMAIL_SCOPE)

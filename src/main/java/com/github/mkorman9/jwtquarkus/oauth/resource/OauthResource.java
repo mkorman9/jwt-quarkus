@@ -4,7 +4,7 @@ import com.github.mkorman9.jwtquarkus.accounts.dto.AccessToken;
 import com.github.mkorman9.jwtquarkus.accounts.dto.payload.TokenResponse;
 import com.github.mkorman9.jwtquarkus.accounts.exception.AccessTokenValidationException;
 import com.github.mkorman9.jwtquarkus.accounts.service.RefreshTokenService;
-import com.github.mkorman9.jwtquarkus.oauth.dto.OauthAuthorization;
+import com.github.mkorman9.jwtquarkus.oauth.dto.OauthTicket;
 import com.github.mkorman9.jwtquarkus.oauth.exception.GithubAccountAlreadyUsedException;
 import com.github.mkorman9.jwtquarkus.oauth.exception.GithubAccountNotFoundException;
 import com.github.mkorman9.jwtquarkus.oauth.exception.OauthFlowException;
@@ -41,13 +41,13 @@ public class OauthResource {
     @GET
     @Path("/login")
     public RestResponse<Object> login() {
-        var auth = githubOauthService.beginLogin();
+        var ticket = githubOauthService.beginLogin();
 
         return RestResponse.ResponseBuilder
-                .seeOther(auth.getUrl())
+                .seeOther(ticket.getUrl())
                 .cookie(
                         new NewCookie.Builder(OAUTH2_COOKIE)
-                                .value(auth.getState().getCookie())
+                                .value(ticket.getState().getCookie())
                                 .expiry(Date.from(
                                         Instant.now().plus(Duration.ofMinutes(5))
                                 ))
@@ -67,18 +67,18 @@ public class OauthResource {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
 
-        OauthAuthorization auth;
+        OauthTicket ticket;
         try {
-            auth = githubOauthService.beginConnectAccount(accessToken.get());
+            ticket = githubOauthService.beginConnectAccount(accessToken.get());
         } catch (AccessTokenValidationException e) {
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         }
 
         return RestResponse.ResponseBuilder
-                .seeOther(auth.getUrl())
+                .seeOther(ticket.getUrl())
                 .cookie(
                         new NewCookie.Builder(OAUTH2_COOKIE)
-                                .value(auth.getState().getCookie())
+                                .value(ticket.getState().getCookie())
                                 .expiry(Date.from(
                                         Instant.now().plus(Duration.ofMinutes(5))
                                 ))

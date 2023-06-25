@@ -4,7 +4,7 @@ import com.github.mkorman9.jwtquarkus.accounts.service.AccessTokenService;
 import com.github.mkorman9.jwtquarkus.accounts.service.AccountService;
 import com.github.mkorman9.jwtquarkus.accounts.dto.AccessToken;
 import com.github.mkorman9.jwtquarkus.oauth.dto.GithubUserInfo;
-import com.github.mkorman9.jwtquarkus.oauth.dto.OauthAuthorization;
+import com.github.mkorman9.jwtquarkus.oauth.dto.OauthTicket;
 import com.github.mkorman9.jwtquarkus.oauth.exception.GithubAccountAlreadyUsedException;
 import com.github.mkorman9.jwtquarkus.oauth.exception.GithubAccountNotFoundException;
 import com.github.mkorman9.jwtquarkus.oauth.exception.OauthStateValidationException;
@@ -29,23 +29,23 @@ public class GithubOauthService {
     @Inject
     AccountService accountService;
 
-    public OauthAuthorization beginLogin() {
+    public OauthTicket beginLogin() {
         var state = oauthStateService.generateState();
-        var url = githubAPI.getLoginAuthorizationUrl(state.getState());
+        var url = githubAPI.getLoginUrl(state.getState());
 
-        return OauthAuthorization.builder()
+        return OauthTicket.builder()
                 .url(url)
                 .state(state)
                 .build();
     }
 
-    public OauthAuthorization beginConnectAccount(String accessToken) {
+    public OauthTicket beginConnectAccount(String accessToken) {
         var token = accessTokenService.validate(accessToken);
 
         var state = oauthStateService.generateState(token.getSubject());
-        var url = githubAPI.getConnectAccountAuthorizationUrl(state.getState());
+        var url = githubAPI.getConnectAccountUrl(state.getState());
 
-        return OauthAuthorization.builder()
+        return OauthTicket.builder()
                 .url(url)
                 .state(state)
                 .build();
