@@ -5,12 +5,14 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.net.URI;
+
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 public class OauthAuthorization {
-    private String url;
+    private URI url;
 
     private OauthState state;
 }

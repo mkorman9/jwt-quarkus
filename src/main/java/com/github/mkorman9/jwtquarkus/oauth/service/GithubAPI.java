@@ -2,8 +2,8 @@ package com.github.mkorman9.jwtquarkus.oauth.service;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.mkorman9.jwtquarkus.oauth.dto.payload.GithubUserEmailResponse;
 import com.github.mkorman9.jwtquarkus.oauth.dto.GithubUserInfo;
+import com.github.mkorman9.jwtquarkus.oauth.dto.payload.GithubUserEmailResponse;
 import com.github.mkorman9.jwtquarkus.oauth.dto.payload.GithubUserInfoResponse;
 import com.github.mkorman9.jwtquarkus.oauth.exception.OauthFlowException;
 import com.github.scribejava.apis.GitHubApi;
@@ -20,6 +20,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 
@@ -53,18 +54,20 @@ public class GithubAPI {
                 .build(GitHubApi.instance());
     }
 
-    public String getLoginAuthorizationUrl(String state) {
-        return loginService.createAuthorizationUrlBuilder()
+    public URI getLoginAuthorizationUrl(String state) {
+        var url = loginService.createAuthorizationUrlBuilder()
                 .state(state)
                 .scope(EMAIL_SCOPE)
                 .build();
+        return URI.create(url);
     }
 
-    public String getConnectAccountAuthorizationUrl(String state) {
-        return connectAccountService.createAuthorizationUrlBuilder()
+    public URI getConnectAccountAuthorizationUrl(String state) {
+        var url = connectAccountService.createAuthorizationUrlBuilder()
                 .state(state)
                 .scope(EMAIL_SCOPE)
                 .build();
+        return URI.create(url);
     }
 
     @SneakyThrows

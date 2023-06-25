@@ -1,15 +1,15 @@
 package com.github.mkorman9.jwtquarkus.oauth.resource;
 
 import com.github.mkorman9.jwtquarkus.accounts.dto.AccessToken;
-import com.github.mkorman9.jwtquarkus.oauth.dto.OauthAuthorization;
 import com.github.mkorman9.jwtquarkus.accounts.dto.payload.TokenResponse;
 import com.github.mkorman9.jwtquarkus.accounts.exception.AccessTokenValidationException;
+import com.github.mkorman9.jwtquarkus.accounts.service.RefreshTokenService;
+import com.github.mkorman9.jwtquarkus.oauth.dto.OauthAuthorization;
 import com.github.mkorman9.jwtquarkus.oauth.exception.GithubAccountAlreadyUsedException;
 import com.github.mkorman9.jwtquarkus.oauth.exception.GithubAccountNotFoundException;
 import com.github.mkorman9.jwtquarkus.oauth.exception.OauthFlowException;
 import com.github.mkorman9.jwtquarkus.oauth.exception.OauthStateValidationException;
 import com.github.mkorman9.jwtquarkus.oauth.service.GithubOauthService;
-import com.github.mkorman9.jwtquarkus.accounts.service.RefreshTokenService;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -20,7 +20,6 @@ import org.jboss.resteasy.reactive.RestCookie;
 import org.jboss.resteasy.reactive.RestQuery;
 import org.jboss.resteasy.reactive.RestResponse;
 
-import java.net.URI;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
@@ -45,7 +44,7 @@ public class OauthResource {
         var auth = githubOauthService.beginLogin();
 
         return RestResponse.ResponseBuilder
-                .seeOther(URI.create(auth.getUrl()))
+                .seeOther(auth.getUrl())
                 .cookie(
                         new NewCookie.Builder(OAUTH2_COOKIE)
                                 .value(auth.getState().getCookie())
@@ -76,7 +75,7 @@ public class OauthResource {
         }
 
         return RestResponse.ResponseBuilder
-                .seeOther(URI.create(auth.getUrl()))
+                .seeOther(auth.getUrl())
                 .cookie(
                         new NewCookie.Builder(OAUTH2_COOKIE)
                                 .value(auth.getState().getCookie())
