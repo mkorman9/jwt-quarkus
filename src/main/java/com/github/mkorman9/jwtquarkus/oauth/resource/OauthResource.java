@@ -1,9 +1,8 @@
 package com.github.mkorman9.jwtquarkus.oauth.resource;
 
-import com.github.mkorman9.jwtquarkus.accounts.dto.AccessToken;
+import com.github.mkorman9.jwtquarkus.accounts.dto.TokenPair;
 import com.github.mkorman9.jwtquarkus.accounts.dto.payload.TokenResponse;
 import com.github.mkorman9.jwtquarkus.accounts.exception.AccessTokenValidationException;
-import com.github.mkorman9.jwtquarkus.accounts.service.RefreshTokenService;
 import com.github.mkorman9.jwtquarkus.oauth.dto.OauthTicket;
 import com.github.mkorman9.jwtquarkus.oauth.exception.GithubAccountAlreadyUsedException;
 import com.github.mkorman9.jwtquarkus.oauth.exception.GithubAccountNotFoundException;
@@ -35,9 +34,6 @@ public class OauthResource {
 
     @Inject
     GithubOauthService githubOauthService;
-
-    @Inject
-    RefreshTokenService refreshTokenService;
 
     @GET
     @Path("/login")
@@ -104,35 +100,34 @@ public class OauthResource {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
 
-        AccessToken token;
+        TokenPair tokenPair;
         try {
-            token = githubOauthService.finishLogin(code.get(), state.get(), cookie.get());
+            tokenPair = githubOauthService.finishLogin(code.get(), state.get(), cookie.get());
         } catch (OauthStateValidationException | OauthFlowException | GithubAccountNotFoundException e) {
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         }
 
-        var refreshToken = refreshTokenService.generate(token);
         var response = TokenResponse.builder()
-                .accessToken(token.getToken())
-                .refreshToken(refreshToken.getToken())
-                .expiresAt(token.getExpiresAt().toEpochMilli())
+                .accessToken(tokenPair.getAccessToken().getToken())
+                .refreshToken(tokenPair.getRefreshToken().getToken())
+                .expiresAt(tokenPair.getAccessToken().getExpiresAt().toEpochMilli())
                 .build();
 
         return RestResponse.ResponseBuilder
                 .ok(response)
                 .cookie(
                         new NewCookie.Builder(ACCESS_TOKEN_COOKIE)
-                                .value(token.getToken())
+                                .value(tokenPair.getAccessToken().getToken())
                                 .sameSite(NewCookie.SameSite.STRICT)
                                 .httpOnly(true)
                                 .build(),
                         new NewCookie.Builder(REFRESH_TOKEN_COOKIE)
-                                .value(refreshToken.getToken())
+                                .value(tokenPair.getRefreshToken().getToken())
                                 .sameSite(NewCookie.SameSite.STRICT)
                                 .httpOnly(true)
                                 .build(),
                         new NewCookie.Builder(EXPIRES_AT_COOKIE)
-                                .value(Long.toString(token.getExpiresAt().toEpochMilli()))
+                                .value(Long.toString(tokenPair.getAccessToken().getExpiresAt().toEpochMilli()))
                                 .sameSite(NewCookie.SameSite.STRICT)
                                 .httpOnly(true)
                                 .build()

@@ -3,9 +3,9 @@ package com.github.mkorman9.jwtquarkus.accounts.resource;
 import com.github.mkorman9.jwtquarkus.accounts.dto.payload.AccountResponse;
 import com.github.mkorman9.jwtquarkus.accounts.dto.payload.TokenRefreshPayload;
 import com.github.mkorman9.jwtquarkus.accounts.dto.payload.TokenResponse;
-import com.github.mkorman9.jwtquarkus.accounts.service.AccessTokenService;
 import com.github.mkorman9.jwtquarkus.accounts.service.AccountService;
 import com.github.mkorman9.jwtquarkus.accounts.service.RefreshTokenService;
+import com.github.mkorman9.jwtquarkus.accounts.service.TokenGenerationService;
 import io.smallrye.common.constraint.NotNull;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
@@ -20,7 +20,7 @@ public class AccountController {
     AccountService accountService;
 
     @Inject
-    AccessTokenService accessTokenService;
+    TokenGenerationService tokenGenerationService;
 
     @Inject
     RefreshTokenService refreshTokenService;
@@ -30,13 +30,11 @@ public class AccountController {
     public AccountResponse newAccount() {
         var userId = accountService.registerAccount();
 
-        var accessToken = accessTokenService.generate(userId);
-        var refreshToken = refreshTokenService.generate(accessToken);
-
+        var tokenPair = tokenGenerationService.generate(userId);
         var tokenResponse = TokenResponse.builder()
-                .accessToken(accessToken.getToken())
-                .refreshToken(refreshToken.getToken())
-                .expiresAt(accessToken.getExpiresAt().toEpochMilli())
+                .accessToken(tokenPair.getAccessToken().getToken())
+                .refreshToken(tokenPair.getRefreshToken().getToken())
+                .expiresAt(tokenPair.getAccessToken().getExpiresAt().toEpochMilli())
                 .build();
 
         return AccountResponse.builder()
@@ -53,13 +51,11 @@ public class AccountController {
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         }
 
-        var accessToken = accessTokenService.generate(result.getUserId());
-        var refreshToken = refreshTokenService.generate(accessToken);
-
+        var tokenPair = tokenGenerationService.generate(result.getUserId());
         return TokenResponse.builder()
-                .accessToken(accessToken.getToken())
-                .refreshToken(refreshToken.getToken())
-                .expiresAt(accessToken.getExpiresAt().toEpochMilli())
+                .accessToken(tokenPair.getAccessToken().getToken())
+                .refreshToken(tokenPair.getRefreshToken().getToken())
+                .expiresAt(tokenPair.getAccessToken().getExpiresAt().toEpochMilli())
                 .build();
     }
 }

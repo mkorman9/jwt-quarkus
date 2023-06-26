@@ -1,8 +1,9 @@
 package com.github.mkorman9.jwtquarkus.oauth.service;
 
+import com.github.mkorman9.jwtquarkus.accounts.dto.TokenPair;
 import com.github.mkorman9.jwtquarkus.accounts.service.AccessTokenService;
 import com.github.mkorman9.jwtquarkus.accounts.service.AccountService;
-import com.github.mkorman9.jwtquarkus.accounts.dto.AccessToken;
+import com.github.mkorman9.jwtquarkus.accounts.service.TokenGenerationService;
 import com.github.mkorman9.jwtquarkus.oauth.dto.GithubUserInfo;
 import com.github.mkorman9.jwtquarkus.oauth.dto.OauthTicket;
 import com.github.mkorman9.jwtquarkus.oauth.exception.GithubAccountAlreadyUsedException;
@@ -22,6 +23,9 @@ public class GithubOauthService {
 
     @Inject
     AccessTokenService accessTokenService;
+
+    @Inject
+    TokenGenerationService tokenGenerationService;
 
     @Inject
     GithubAPI githubAPI;
@@ -51,7 +55,7 @@ public class GithubOauthService {
                 .build();
     }
 
-    public AccessToken finishLogin(String code, String state, String cookie) {
+    public TokenPair finishLogin(String code, String state, String cookie) {
         var validationResult = oauthStateService.validateState(state, cookie);
         if (!validationResult.isValid()) {
             throw new OauthStateValidationException();
@@ -76,14 +80,14 @@ public class GithubOauthService {
         connectAccount(userInfo, userId);
     }
 
-    private AccessToken loginToAccount(GithubUserInfo userInfo) {
+    private TokenPair loginToAccount(GithubUserInfo userInfo) {
         var userId = accountService.getByGithubId(userInfo.getId());
         if (userId == null) {
             throw new GithubAccountNotFoundException();
         }
 
         log.info("User {} logged in as {} ({})", userId, userInfo.getName(), userInfo.getEmail());
-        return accessTokenService.generate(userId);
+        return tokenGenerationService.generate(userId);
     }
 
     private void connectAccount(GithubUserInfo userInfo, UUID userId) {
