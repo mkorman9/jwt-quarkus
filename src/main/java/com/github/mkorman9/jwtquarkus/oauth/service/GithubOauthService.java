@@ -3,7 +3,7 @@ package com.github.mkorman9.jwtquarkus.oauth.service;
 import com.github.mkorman9.jwtquarkus.accounts.dto.TokenPair;
 import com.github.mkorman9.jwtquarkus.accounts.service.AccessTokenService;
 import com.github.mkorman9.jwtquarkus.accounts.service.AccountService;
-import com.github.mkorman9.jwtquarkus.accounts.service.TokenGenerationService;
+import com.github.mkorman9.jwtquarkus.accounts.service.TokenFacade;
 import com.github.mkorman9.jwtquarkus.oauth.dto.GithubUserInfo;
 import com.github.mkorman9.jwtquarkus.oauth.dto.OauthTicket;
 import com.github.mkorman9.jwtquarkus.oauth.exception.GithubAccountAlreadyUsedException;
@@ -25,7 +25,7 @@ public class GithubOauthService {
     AccessTokenService accessTokenService;
 
     @Inject
-    TokenGenerationService tokenGenerationService;
+    TokenFacade tokenFacade;
 
     @Inject
     GithubAPI githubAPI;
@@ -87,7 +87,7 @@ public class GithubOauthService {
         }
 
         log.info("User {} logged in as {} ({})", userId, userInfo.getName(), userInfo.getEmail());
-        return tokenGenerationService.generate(userId);
+        return tokenFacade.generatePair(userId);
     }
 
     private void connectAccount(GithubUserInfo userInfo, UUID userId) {
