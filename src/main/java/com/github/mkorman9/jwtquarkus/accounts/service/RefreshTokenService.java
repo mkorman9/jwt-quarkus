@@ -42,18 +42,18 @@ public class RefreshTokenService {
     }
 
     public RefreshToken generate(AccessToken source) {
-        JsonWebToken token;
+        JsonWebToken accessToken;
 
         try {
-            token = jwtParser.parse(source.getToken());
+            accessToken = jwtParser.parse(source.getToken());
         } catch (ParseException e) {
             throw new AccessTokenValidationException(e);
         }
 
-        var tokenId = token.getTokenID();
+        var accessTokenId = accessToken.getTokenID();
         var refreshToken = Jwt.issuer("jwt-quarkus")
                 .audience(REFRESH_AUDIENCE)
-                .subject(tokenId)
+                .subject(accessTokenId)
                 .expiresAt(ZonedDateTime.now(ZoneOffset.UTC).plus(REFRESH_TOKEN_DURATION).toInstant())
                 .sign();
 
