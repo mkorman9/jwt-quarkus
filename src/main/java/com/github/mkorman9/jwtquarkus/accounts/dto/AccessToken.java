@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.Instant;
+import java.util.UUID;
 
 @Getter
 @Builder
@@ -14,7 +15,7 @@ import java.time.Instant;
 public class AccessToken {
     private String token;
 
-    private String subject;
+    private UUID subject;
 
     private Instant expiresAt;
 }

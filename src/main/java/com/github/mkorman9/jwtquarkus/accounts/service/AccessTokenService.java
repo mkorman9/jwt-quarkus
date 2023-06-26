@@ -32,7 +32,7 @@ public class AccessTokenService {
 
         return AccessToken.builder()
                 .token(token)
-                .subject(userId.toString())
+                .subject(userId)
                 .expiresAt(expiresAt)
                 .build();
     }
@@ -48,7 +48,7 @@ public class AccessTokenService {
 
         return AccessToken.builder()
                 .token(accessToken)
-                .subject(token.getSubject())
+                .subject(UUID.fromString(token.getSubject()))
                 .expiresAt(Instant.ofEpochMilli(token.getExpirationTime()))
                 .build();
     }

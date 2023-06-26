@@ -46,7 +46,7 @@ public class GithubOauthService {
     public OauthTicket beginConnectAccount(String accessToken) {
         var token = accessTokenService.validate(accessToken);
 
-        var state = oauthStateService.generateState(token.getSubject());
+        var state = oauthStateService.generateState(token.getSubject().toString());
         var url = githubAPI.getConnectAccountUrl(state.getState());
 
         return OauthTicket.builder()
