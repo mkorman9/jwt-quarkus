@@ -10,6 +10,7 @@ import com.github.mkorman9.jwtquarkus.oauth.exception.GithubAccountNotFoundExcep
 import com.github.mkorman9.jwtquarkus.oauth.exception.OauthFlowException;
 import com.github.mkorman9.jwtquarkus.oauth.exception.OauthStateValidationException;
 import com.github.mkorman9.jwtquarkus.oauth.service.GithubOauthService;
+import io.quarkiverse.bucket4j.runtime.RateLimited;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -40,6 +41,7 @@ public class OauthResource {
 
     @GET
     @Path("/login")
+    @RateLimited(bucket = "oauth")
     public RestResponse<Object> login() {
         var ticket = githubOauthService.beginLogin();
 
@@ -60,6 +62,7 @@ public class OauthResource {
 
     @GET
     @Path("/connect-account")
+    @RateLimited(bucket = "oauth")
     public RestResponse<Object> connectAccount(
             @RestQuery("accessToken") Optional<String> accessToken
     ) {
@@ -91,6 +94,7 @@ public class OauthResource {
 
     @GET
     @Path("/callback/login")
+    @RateLimited(bucket = "oauth")
     public RestResponse<TokenResponse> loginCallback(
             @RestQuery Optional<String> code,
             @RestQuery Optional<String> state,
@@ -138,6 +142,7 @@ public class OauthResource {
 
     @GET
     @Path("/callback/connect-account")
+    @RateLimited(bucket = "oauth")
     public String connectAccountCallback(
             @RestQuery Optional<String> code,
             @RestQuery Optional<String> state,
