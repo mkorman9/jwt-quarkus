@@ -4,6 +4,8 @@ import com.github.mkorman9.jwtquarkus.accounts.dto.TokenPair;
 import com.github.mkorman9.jwtquarkus.accounts.dto.payload.AccountResponse;
 import com.github.mkorman9.jwtquarkus.accounts.dto.payload.TokenRefreshPayload;
 import com.github.mkorman9.jwtquarkus.accounts.dto.payload.TokenResponse;
+import com.github.mkorman9.jwtquarkus.accounts.exception.AccessTokenValidationException;
+import com.github.mkorman9.jwtquarkus.accounts.exception.RefreshTokenValidationException;
 import com.github.mkorman9.jwtquarkus.accounts.exception.TokenRefreshException;
 import com.github.mkorman9.jwtquarkus.accounts.service.AccountService;
 import com.github.mkorman9.jwtquarkus.accounts.service.TokenFacade;
@@ -27,17 +29,11 @@ public class AccountController {
     @Path("/new")
     public AccountResponse newAccount() {
         var userId = accountService.registerAccount();
-
         var tokenPair = tokenFacade.generatePair(userId);
-        var tokenResponse = TokenResponse.builder()
-                .accessToken(tokenPair.getAccessToken().getToken())
-                .refreshToken(tokenPair.getRefreshToken().getToken())
-                .expiresAt(tokenPair.getAccessToken().getExpiresAt().toEpochMilli())
-                .build();
 
         return AccountResponse.builder()
                 .id(userId.toString())
-                .token(tokenResponse)
+                .token(TokenResponse.fromPair(tokenPair))
                 .build();
     }
 
@@ -47,14 +43,10 @@ public class AccountController {
         TokenPair tokenPair;
         try {
             tokenPair = tokenFacade.refreshToken(payload.getAccessToken(), payload.getRefreshToken());
-        } catch (TokenRefreshException e) {
+        } catch (AccessTokenValidationException | RefreshTokenValidationException | TokenRefreshException e) {
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         }
 
-        return TokenResponse.builder()
-                .accessToken(tokenPair.getAccessToken().getToken())
-                .refreshToken(tokenPair.getRefreshToken().getToken())
-                .expiresAt(tokenPair.getAccessToken().getExpiresAt().toEpochMilli())
-                .build();
+        return TokenResponse.fromPair(tokenPair);
     }
 }

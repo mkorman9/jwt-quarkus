@@ -2,7 +2,9 @@ package com.github.mkorman9.jwtquarkus.accounts.service;
 
 import com.github.mkorman9.jwtquarkus.accounts.dto.AccessToken;
 import com.github.mkorman9.jwtquarkus.accounts.dto.RefreshToken;
-import com.github.mkorman9.jwtquarkus.accounts.dto.TokenRefreshResult;
+import com.github.mkorman9.jwtquarkus.accounts.exception.AccessTokenValidationException;
+import com.github.mkorman9.jwtquarkus.accounts.exception.RefreshTokenValidationException;
+import com.github.mkorman9.jwtquarkus.accounts.exception.TokenRefreshException;
 import io.smallrye.jwt.auth.principal.JWTAuthContextInfo;
 import io.smallrye.jwt.auth.principal.JWTParser;
 import io.smallrye.jwt.auth.principal.ParseException;
@@ -45,7 +47,7 @@ public class RefreshTokenService {
         try {
             token = jwtParser.parse(source.getToken());
         } catch (ParseException e) {
-            throw new RuntimeException(e);
+            throw new AccessTokenValidationException(e);
         }
 
         var tokenId = token.getTokenID();
@@ -60,29 +62,25 @@ public class RefreshTokenService {
                 .build();
     }
 
-    public TokenRefreshResult refresh(String refreshToken, String accessToken) {
+    public UUID refresh(String accessToken, String refreshToken) {
         JsonWebToken accessTokenParsed;
-        JsonWebToken refreshTokenParsed;
-
         try {
             accessTokenParsed = jwtParser.parse(accessToken, accessTokenContextInfo);
+        } catch (ParseException e) {
+            throw new AccessTokenValidationException(e);
+        }
+
+        JsonWebToken refreshTokenParsed;
+        try {
             refreshTokenParsed = jwtParser.parse(refreshToken, refreshTokenContextInfo);
         } catch (ParseException e) {
-            log.error("Refresh token parsing exception", e);
-            return TokenRefreshResult.builder()
-                    .valid(false)
-                    .build();
+            throw new RefreshTokenValidationException(e);
         }
 
         if (!refreshTokenParsed.getSubject().equals(accessTokenParsed.getTokenID())) {
-            return TokenRefreshResult.builder()
-                    .valid(false)
-                    .build();
+            throw new TokenRefreshException("Subjects mismatch");
         }
 
-        return TokenRefreshResult.builder()
-                .valid(true)
-                .userId(UUID.fromString(accessTokenParsed.getSubject()))
-                .build();
+        return UUID.fromString(accessTokenParsed.getSubject());
     }
 }

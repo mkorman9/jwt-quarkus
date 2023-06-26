@@ -1,7 +1,6 @@
 package com.github.mkorman9.jwtquarkus.accounts.service;
 
 import com.github.mkorman9.jwtquarkus.accounts.dto.TokenPair;
-import com.github.mkorman9.jwtquarkus.accounts.exception.TokenRefreshException;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 
@@ -26,11 +25,7 @@ public class TokenFacade {
     }
 
     public TokenPair refreshToken(String accessToken, String refreshToken) {
-        var result = refreshTokenService.refresh(refreshToken, accessToken);
-        if (!result.isValid()) {
-            throw new TokenRefreshException();
-        }
-
-        return generatePair(result.getUserId());
+        var userId = refreshTokenService.refresh(accessToken, refreshToken);
+        return generatePair(userId);
     }
 }

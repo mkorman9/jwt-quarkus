@@ -7,7 +7,6 @@ import io.smallrye.jwt.auth.principal.ParseException;
 import io.smallrye.jwt.build.Jwt;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 import java.time.Duration;
@@ -16,7 +15,6 @@ import java.time.temporal.TemporalAmount;
 import java.util.UUID;
 
 @ApplicationScoped
-@Slf4j
 public class AccessTokenService {
     private static final String ACCESS_AUDIENCE = "jwt-quarkus/access";
     private static final TemporalAmount ACCESS_TOKEN_DURATION = Duration.ofHours(12);
@@ -45,8 +43,7 @@ public class AccessTokenService {
         try {
             token = jwtParser.parse(accessToken);
         } catch (ParseException e) {
-            log.error("Access token validation error", e);
-            throw new AccessTokenValidationException();
+            throw new AccessTokenValidationException(e);
         }
 
         return AccessToken.builder()
