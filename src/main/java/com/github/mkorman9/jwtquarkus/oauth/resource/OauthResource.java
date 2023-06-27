@@ -107,14 +107,8 @@ public class OauthResource {
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         }
 
-        var response = TokenResponse.builder()
-                .accessToken(tokenPair.getAccessToken().getToken())
-                .refreshToken(tokenPair.getRefreshToken().getToken())
-                .expiresAt(tokenPair.getAccessToken().getExpiresAt().toEpochMilli())
-                .build();
-
         return RestResponse.ResponseBuilder
-                .ok(response)
+                .ok(TokenResponse.fromPair(tokenPair))
                 .cookie(
                         new NewCookie.Builder(ACCESS_TOKEN_COOKIE)
                                 .value(tokenPair.getAccessToken().getToken())
