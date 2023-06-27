@@ -1,5 +1,6 @@
 package com.github.mkorman9.jwtquarkus.accounts.service;
 
+import com.github.mkorman9.jwtquarkus.accounts.dto.AccessToken;
 import com.github.mkorman9.jwtquarkus.accounts.dto.TokenPair;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
@@ -27,5 +28,9 @@ public class TokenFacade {
     public TokenPair refreshToken(String accessToken, String refreshToken) {
         var userId = refreshTokenService.refresh(accessToken, refreshToken);
         return generatePair(userId);
+    }
+
+    public AccessToken validateAccessToken(String accessToken) {
+        return accessTokenService.validate(accessToken);
     }
 }

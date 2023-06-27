@@ -1,7 +1,6 @@
 package com.github.mkorman9.jwtquarkus.oauth.service;
 
 import com.github.mkorman9.jwtquarkus.accounts.dto.TokenPair;
-import com.github.mkorman9.jwtquarkus.accounts.service.AccessTokenService;
 import com.github.mkorman9.jwtquarkus.accounts.service.AccountService;
 import com.github.mkorman9.jwtquarkus.accounts.service.TokenFacade;
 import com.github.mkorman9.jwtquarkus.oauth.dto.GithubUserInfo;
@@ -20,9 +19,6 @@ import java.util.UUID;
 public class GithubOauthService {
     @Inject
     OauthStateService oauthStateService;
-
-    @Inject
-    AccessTokenService accessTokenService;
 
     @Inject
     TokenFacade tokenFacade;
@@ -44,7 +40,7 @@ public class GithubOauthService {
     }
 
     public OauthTicket beginConnectAccount(String accessToken) {
-        var token = accessTokenService.validate(accessToken);
+        var token = tokenFacade.validateAccessToken(accessToken);
 
         var state = oauthStateService.generateState(token.getSubject().toString());
         var url = githubAPI.getConnectAccountUrl(state.getState());
