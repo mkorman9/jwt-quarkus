@@ -7,4 +7,3 @@ public record RefreshToken(
     String token
 ) {
 }
-

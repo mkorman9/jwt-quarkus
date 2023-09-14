@@ -1,8 +1,6 @@
 package com.github.mkorman9.jwtquarkus.accounts.resource;
 
 import com.github.mkorman9.jwtquarkus.accounts.dto.TokenPair;
-import com.github.mkorman9.jwtquarkus.accounts.dto.payload.AccountResponse;
-import com.github.mkorman9.jwtquarkus.accounts.dto.payload.TokenRefreshPayload;
 import com.github.mkorman9.jwtquarkus.accounts.dto.payload.TokenResponse;
 import com.github.mkorman9.jwtquarkus.accounts.exception.AccessTokenValidationException;
 import com.github.mkorman9.jwtquarkus.accounts.exception.RefreshTokenValidationException;
@@ -14,6 +12,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
+import lombok.Builder;
 
 @Path("/account")
 @Produces(MediaType.APPLICATION_JSON)
@@ -48,5 +47,18 @@ public class AccountController {
         }
 
         return TokenResponse.fromPair(tokenPair);
+    }
+
+    public record TokenRefreshPayload(
+        String accessToken,
+        String refreshToken
+    ) {
+    }
+
+    @Builder
+    public record AccountResponse(
+        String id,
+        TokenResponse token
+    ) {
     }
 }

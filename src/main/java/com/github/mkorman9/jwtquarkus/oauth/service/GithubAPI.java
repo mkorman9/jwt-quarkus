@@ -1,10 +1,9 @@
 package com.github.mkorman9.jwtquarkus.oauth.service;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.mkorman9.jwtquarkus.oauth.dto.GithubUserInfo;
-import com.github.mkorman9.jwtquarkus.oauth.dto.payload.GithubUserEmailResponse;
-import com.github.mkorman9.jwtquarkus.oauth.dto.payload.GithubUserInfoResponse;
 import com.github.mkorman9.jwtquarkus.oauth.exception.OauthFlowException;
 import com.github.scribejava.apis.GitHubApi;
 import com.github.scribejava.core.builder.ServiceBuilder;
@@ -132,5 +131,20 @@ public class GithubAPI {
             log.error("Error while retrieving GitHub emails", e);
             throw new OauthFlowException();
         }
+    }
+
+    private record GithubUserEmailResponse(
+        String email,
+        boolean verified,
+        boolean primary
+    ) {
+    }
+
+    private record GithubUserInfoResponse(
+        long id,
+        String login,
+        String name,
+        @JsonProperty("avatar_url") String avatarUrl
+    ) {
     }
 }
