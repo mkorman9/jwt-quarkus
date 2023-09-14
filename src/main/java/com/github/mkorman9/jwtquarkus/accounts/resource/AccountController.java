@@ -38,6 +38,7 @@ public class AccountController {
 
     @PUT
     @Path("/token/refresh")
+    @Consumes(MediaType.APPLICATION_JSON)
     public TokenResponse refreshToken(@NotNull TokenRefreshPayload payload) {
         TokenPair tokenPair;
         try {
