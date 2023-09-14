@@ -11,13 +11,12 @@ import com.github.mkorman9.jwtquarkus.accounts.service.AccountService;
 import com.github.mkorman9.jwtquarkus.accounts.service.TokenFacade;
 import io.smallrye.common.constraint.NotNull;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.GET;
-import jakarta.ws.rs.PUT;
-import jakarta.ws.rs.Path;
-import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 
 @Path("/account")
+@Produces(MediaType.APPLICATION_JSON)
 public class AccountController {
     @Inject
     AccountService accountService;
@@ -42,7 +41,7 @@ public class AccountController {
     public TokenResponse refreshToken(@NotNull TokenRefreshPayload payload) {
         TokenPair tokenPair;
         try {
-            tokenPair = tokenFacade.refreshToken(payload.getAccessToken(), payload.getRefreshToken());
+            tokenPair = tokenFacade.refreshToken(payload.accessToken(), payload.refreshToken());
         } catch (AccessTokenValidationException | RefreshTokenValidationException | TokenRefreshException e) {
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         }

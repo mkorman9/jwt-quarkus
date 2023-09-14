@@ -3,10 +3,13 @@ package com.github.mkorman9.jwtquarkus.accounts.resource;
 import io.quarkus.security.Authenticated;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 @Path("/")
+@Produces(MediaType.APPLICATION_JSON)
 public class HelloWorldResource {
     @GET
     @Authenticated

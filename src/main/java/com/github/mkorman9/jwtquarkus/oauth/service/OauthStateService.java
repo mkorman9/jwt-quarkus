@@ -44,13 +44,13 @@ public class OauthStateService {
         var state = Jwt.issuer("jwt-quarkus")
                 .audience(STATE_AUDIENCE)
                 .subject(subject)
-                .claim("cookie", cookie.getCookieHash())
+                .claim("cookie", cookie.cookieHash())
                 .expiresIn(Instant.now().plus(STATE_DURATION).toEpochMilli())
                 .sign();
 
         return OauthState.builder()
                 .state(state)
-                .cookie(cookie.getCookie())
+                .cookie(cookie.cookie())
                 .build();
     }
 

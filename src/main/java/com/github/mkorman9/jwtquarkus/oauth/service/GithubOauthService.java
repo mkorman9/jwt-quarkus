@@ -31,7 +31,7 @@ public class GithubOauthService {
 
     public OauthTicket beginLogin() {
         var state = oauthStateService.generateState();
-        var url = githubAPI.getLoginUrl(state.getState());
+        var url = githubAPI.getLoginUrl(state.state());
 
         return OauthTicket.builder()
                 .url(url)
@@ -42,8 +42,8 @@ public class GithubOauthService {
     public OauthTicket beginConnectAccount(String accessToken) {
         var token = tokenFacade.validateAccessToken(accessToken);
 
-        var state = oauthStateService.generateState(token.getSubject().toString());
-        var url = githubAPI.getConnectAccountUrl(state.getState());
+        var state = oauthStateService.generateState(token.subject().toString());
+        var url = githubAPI.getConnectAccountUrl(state.state());
 
         return OauthTicket.builder()
                 .url(url)
@@ -53,7 +53,7 @@ public class GithubOauthService {
 
     public TokenPair finishLogin(String code, String state, String cookie) {
         var validationResult = oauthStateService.validateState(state, cookie);
-        if (!validationResult.isValid()) {
+        if (!validationResult.valid()) {
             throw new OauthStateValidationException();
         }
 
@@ -65,29 +65,29 @@ public class GithubOauthService {
 
     public void finishConnectAccount(String code, String state, String cookie) {
         var validationResult = oauthStateService.validateState(state, cookie);
-        if (!validationResult.isValid()) {
+        if (!validationResult.valid()) {
             throw new OauthStateValidationException();
         }
 
         var githubAccessToken = githubAPI.retrieveAccessToken(code);
         var userInfo = githubAPI.retrieveUserInfo(githubAccessToken);
-        var userId = UUID.fromString(validationResult.getSubject());
+        var userId = UUID.fromString(validationResult.subject());
 
         connectAccount(userInfo, userId);
     }
 
     private TokenPair loginToAccount(GithubUserInfo userInfo) {
-        var userId = accountService.getByGithubId(userInfo.getId());
+        var userId = accountService.getByGithubId(userInfo.id());
         if (userId == null) {
             throw new GithubAccountNotFoundException();
         }
 
-        log.info("User {} logged in as {} ({})", userId, userInfo.getName(), userInfo.getEmail());
+        log.info("User {} logged in as {} ({})", userId, userInfo.getClass(), userInfo.email());
         return tokenFacade.generatePair(userId);
     }
 
     private void connectAccount(GithubUserInfo userInfo, UUID userId) {
-        if (accountService.getByGithubId(userInfo.getId()) != null) {
+        if (accountService.getByGithubId(userInfo.id()) != null) {
             throw new GithubAccountAlreadyUsedException();
         }
 

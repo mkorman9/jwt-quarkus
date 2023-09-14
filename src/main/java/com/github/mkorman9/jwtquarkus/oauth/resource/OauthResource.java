@@ -42,10 +42,10 @@ public class OauthResource {
         var ticket = githubOauthService.beginLogin();
 
         return RestResponse.ResponseBuilder
-                .seeOther(ticket.getUrl())
+                .seeOther(ticket.url())
                 .cookie(
                         new NewCookie.Builder(OAUTH2_COOKIE)
-                                .value(ticket.getState().getCookie())
+                                .value(ticket.state().cookie())
                                 .expiry(Date.from(
                                         Instant.now().plus(Duration.ofMinutes(5))
                                 ))
@@ -74,10 +74,10 @@ public class OauthResource {
         }
 
         return RestResponse.ResponseBuilder
-                .seeOther(ticket.getUrl())
+                .seeOther(ticket.url())
                 .cookie(
                         new NewCookie.Builder(OAUTH2_COOKIE)
-                                .value(ticket.getState().getCookie())
+                                .value(ticket.state().cookie())
                                 .expiry(Date.from(
                                         Instant.now().plus(Duration.ofMinutes(5))
                                 ))
@@ -111,17 +111,17 @@ public class OauthResource {
                 .ok(TokenResponse.fromPair(tokenPair))
                 .cookie(
                         new NewCookie.Builder(ACCESS_TOKEN_COOKIE)
-                                .value(tokenPair.getAccessToken().getToken())
+                                .value(tokenPair.accessToken().token())
                                 .sameSite(NewCookie.SameSite.STRICT)
                                 .httpOnly(true)
                                 .build(),
                         new NewCookie.Builder(REFRESH_TOKEN_COOKIE)
-                                .value(tokenPair.getRefreshToken().getToken())
+                                .value(tokenPair.refreshToken().token())
                                 .sameSite(NewCookie.SameSite.STRICT)
                                 .httpOnly(true)
                                 .build(),
                         new NewCookie.Builder(EXPIRES_AT_COOKIE)
-                                .value(Long.toString(tokenPair.getAccessToken().getExpiresAt().toEpochMilli()))
+                                .value(Long.toString(tokenPair.accessToken().expiresAt().toEpochMilli()))
                                 .sameSite(NewCookie.SameSite.STRICT)
                                 .httpOnly(true)
                                 .build()

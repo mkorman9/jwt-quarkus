@@ -45,7 +45,7 @@ public class RefreshTokenService {
         JsonWebToken accessToken;
 
         try {
-            accessToken = jwtParser.parse(source.getToken());
+            accessToken = jwtParser.parse(source.token());
         } catch (ParseException e) {
             throw new AccessTokenValidationException(e);
         }

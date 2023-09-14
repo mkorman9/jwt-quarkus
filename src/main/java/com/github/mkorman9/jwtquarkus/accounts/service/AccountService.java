@@ -25,9 +25,9 @@ public class AccountService {
     }
 
     public void connectGithubAccount(GithubUserInfo userInfo, UUID id) {
-        log.info("User {} connected GitHub account {} ({})", id, userInfo.getName(), userInfo.getEmail());
+        log.info("User {} connected GitHub account {} ({})", id, userInfo.name(), userInfo.email());
 
-        GITHUB_CONNECTIONS.put(userInfo.getId(), id);
+        GITHUB_CONNECTIONS.put(userInfo.id(), id);
     }
 
     public UUID getByGithubId(long githubId) {

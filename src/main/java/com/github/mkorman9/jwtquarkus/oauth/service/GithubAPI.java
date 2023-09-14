@@ -84,23 +84,23 @@ public class GithubAPI {
         var userInfo = retrieveUserInfoResponse(accessToken);
         var userEmails = retrieveUserEmailResponses(accessToken);
         return GithubUserInfo.builder()
-                .id(userInfo.getId())
-                .login(userInfo.getLogin())
-                .name(userInfo.getName())
+                .id(userInfo.id())
+                .login(userInfo.login())
+                .name(userInfo.name())
                 .email(selectUserEmail(userEmails))
-                .avatarUrl(userInfo.getAvatarUrl())
+                .avatarUrl(userInfo.avatarUrl())
                 .build();
     }
 
     private static String selectUserEmail(List<GithubUserEmailResponse> userEmails) {
         String candidate = "";
         for (var email : userEmails) {
-            if (email.isPrimary() && email.isVerified()) {
-                return email.getEmail();  // return primary, verified email immediately
+            if (email.primary() && email.verified()) {
+                return email.email();  // return primary, verified email immediately
             }
 
-            if (email.isVerified()) {
-                candidate = email.getEmail();
+            if (email.verified()) {
+                candidate = email.email();
             }
         }
 
