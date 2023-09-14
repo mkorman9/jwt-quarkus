@@ -1,8 +1,8 @@
 package com.github.mkorman9.jwtquarkus.oauth.service;
 
-import com.github.mkorman9.jwtquarkus.oauth.dto.OauthCookie;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.xml.bind.DatatypeConverter;
+import lombok.Builder;
 import lombok.SneakyThrows;
 
 import java.nio.charset.StandardCharsets;
@@ -56,5 +56,12 @@ public class OauthCookieService {
     @SneakyThrows
     private static MessageDigest createMessageDigest() {
         return MessageDigest.getInstance("SHA-256");
+    }
+
+    @Builder
+    public record OauthCookie(
+        String cookie,
+        String cookieHash
+    ) {
     }
 }

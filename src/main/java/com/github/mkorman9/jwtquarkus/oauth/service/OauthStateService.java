@@ -1,13 +1,13 @@
 package com.github.mkorman9.jwtquarkus.oauth.service;
 
 import com.github.mkorman9.jwtquarkus.oauth.dto.OauthState;
-import com.github.mkorman9.jwtquarkus.oauth.dto.OauthStateValidationResult;
 import io.smallrye.jwt.auth.principal.JWTAuthContextInfo;
 import io.smallrye.jwt.auth.principal.JWTParser;
 import io.smallrye.jwt.auth.principal.ParseException;
 import io.smallrye.jwt.build.Jwt;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
+import lombok.Builder;
 import lombok.extern.slf4j.Slf4j;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
@@ -83,5 +83,12 @@ public class OauthStateService {
             .valid(true)
             .subject(token.getSubject())
             .build();
+    }
+
+    @Builder
+    public record OauthStateValidationResult(
+        boolean valid,
+        String subject
+    ) {
     }
 }
