@@ -11,9 +11,9 @@ public record TokenResponse(
 ) {
     public static TokenResponse fromPair(TokenPair pair) {
         return TokenResponse.builder()
-                .accessToken(pair.accessToken().token())
-                .refreshToken(pair.refreshToken().token())
-                .expiresAt(pair.accessToken().expiresAt().toEpochMilli())
-                .build();
+            .accessToken(pair.accessToken().token())
+            .refreshToken(pair.refreshToken().token())
+            .expiresAt(pair.accessToken().expiresAt().toEpochMilli())
+            .build();
     }
 }
