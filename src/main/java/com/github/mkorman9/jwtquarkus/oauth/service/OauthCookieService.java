@@ -21,9 +21,9 @@ public class OauthCookieService {
         var cookieHash = hashCookie(cookieValue);
 
         return OauthCookie.builder()
-                .cookie(cookieValue)
-                .cookieHash(cookieHash)
-                .build();
+            .cookie(cookieValue)
+            .cookieHash(cookieHash)
+            .build();
     }
 
     public boolean validateCookie(String cookie, String cookieHash) {
@@ -33,14 +33,14 @@ public class OauthCookieService {
 
     private String generateRandomCookie() {
         return RANDOM.ints(COOKIE_LENGTH, 0, COOKIE_CHARSET.length())
-                .mapToObj(COOKIE_CHARSET::charAt)
-                .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
-                .toString();
+            .mapToObj(COOKIE_CHARSET::charAt)
+            .collect(StringBuilder::new, StringBuilder::append, StringBuilder::append)
+            .toString();
     }
 
     private String hashCookie(String value) {
         return DatatypeConverter.printHexBinary(
-                DIGEST.digest(value.getBytes(StandardCharsets.US_ASCII))
+            DIGEST.digest(value.getBytes(StandardCharsets.US_ASCII))
         );
     }
 

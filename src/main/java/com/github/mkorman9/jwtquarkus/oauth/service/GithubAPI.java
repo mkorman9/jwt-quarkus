@@ -39,34 +39,34 @@ public class GithubAPI {
 
     @Inject
     public GithubAPI(
-            @ConfigProperty(name="oauth2.clientId") String clientId,
-            @ConfigProperty(name="oauth2.clientSecret") String clientSecret,
-            @ConfigProperty(name="oauth2.loginRedirectUrl") String loginRedirectUrl,
-            @ConfigProperty(name="oauth2.connectAccountRedirectUrl") String connectAccountRedirectUrl
+        @ConfigProperty(name = "oauth2.clientId") String clientId,
+        @ConfigProperty(name = "oauth2.clientSecret") String clientSecret,
+        @ConfigProperty(name = "oauth2.loginRedirectUrl") String loginRedirectUrl,
+        @ConfigProperty(name = "oauth2.connectAccountRedirectUrl") String connectAccountRedirectUrl
     ) {
         this.loginService = new ServiceBuilder(clientId)
-                .apiSecret(clientSecret)
-                .callback(loginRedirectUrl)
-                .build(GitHubApi.instance());
+            .apiSecret(clientSecret)
+            .callback(loginRedirectUrl)
+            .build(GitHubApi.instance());
         this.connectAccountService = new ServiceBuilder(clientId)
-                .apiSecret(clientSecret)
-                .callback(connectAccountRedirectUrl)
-                .build(GitHubApi.instance());
+            .apiSecret(clientSecret)
+            .callback(connectAccountRedirectUrl)
+            .build(GitHubApi.instance());
     }
 
     public URI getLoginUrl(String state) {
         var url = loginService.createAuthorizationUrlBuilder()
-                .state(state)
-                .scope(EMAIL_SCOPE)
-                .build();
+            .state(state)
+            .scope(EMAIL_SCOPE)
+            .build();
         return URI.create(url);
     }
 
     public URI getConnectAccountUrl(String state) {
         var url = connectAccountService.createAuthorizationUrlBuilder()
-                .state(state)
-                .scope(EMAIL_SCOPE)
-                .build();
+            .state(state)
+            .scope(EMAIL_SCOPE)
+            .build();
         return URI.create(url);
     }
 
@@ -84,12 +84,12 @@ public class GithubAPI {
         var userInfo = retrieveUserInfoResponse(accessToken);
         var userEmails = retrieveUserEmailResponses(accessToken);
         return GithubUserInfo.builder()
-                .id(userInfo.id())
-                .login(userInfo.login())
-                .name(userInfo.name())
-                .email(selectUserEmail(userEmails))
-                .avatarUrl(userInfo.avatarUrl())
-                .build();
+            .id(userInfo.id())
+            .login(userInfo.login())
+            .name(userInfo.name())
+            .email(selectUserEmail(userEmails))
+            .avatarUrl(userInfo.avatarUrl())
+            .build();
     }
 
     private static String selectUserEmail(List<GithubUserEmailResponse> userEmails) {
@@ -126,7 +126,8 @@ public class GithubAPI {
 
         try (var response = loginService.execute(request)) {
             var body = response.getBody();
-            return objectMapper.readValue(body, new TypeReference<>(){});
+            return objectMapper.readValue(body, new TypeReference<>() {
+            });
         } catch (IOException | ExecutionException | InterruptedException e) {
             log.error("Error while retrieving GitHub emails", e);
             throw new OauthFlowException();

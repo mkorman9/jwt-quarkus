@@ -42,25 +42,25 @@ public class OauthResource {
         var ticket = githubOauthService.beginLogin();
 
         return RestResponse.ResponseBuilder
-                .seeOther(ticket.url())
-                .cookie(
-                        new NewCookie.Builder(OAUTH2_COOKIE)
-                                .value(ticket.state().cookie())
-                                .expiry(Date.from(
-                                        Instant.now().plus(Duration.ofMinutes(5))
-                                ))
-                                .sameSite(NewCookie.SameSite.STRICT)
-                                .httpOnly(true)
-                                .build()
-                )
-                .build();
+            .seeOther(ticket.url())
+            .cookie(
+                new NewCookie.Builder(OAUTH2_COOKIE)
+                    .value(ticket.state().cookie())
+                    .expiry(Date.from(
+                        Instant.now().plus(Duration.ofMinutes(5))
+                    ))
+                    .sameSite(NewCookie.SameSite.STRICT)
+                    .httpOnly(true)
+                    .build()
+            )
+            .build();
     }
 
     @GET
     @Path("/connect-account")
     @RateLimited(bucket = "oauth")
     public RestResponse<Object> connectAccount(
-            @RestQuery("accessToken") Optional<String> accessToken
+        @RestQuery("accessToken") Optional<String> accessToken
     ) {
         if (accessToken.isEmpty()) {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
@@ -74,27 +74,27 @@ public class OauthResource {
         }
 
         return RestResponse.ResponseBuilder
-                .seeOther(ticket.url())
-                .cookie(
-                        new NewCookie.Builder(OAUTH2_COOKIE)
-                                .value(ticket.state().cookie())
-                                .expiry(Date.from(
-                                        Instant.now().plus(Duration.ofMinutes(5))
-                                ))
-                                .sameSite(NewCookie.SameSite.STRICT)
-                                .httpOnly(true)
-                                .build()
-                )
-                .build();
+            .seeOther(ticket.url())
+            .cookie(
+                new NewCookie.Builder(OAUTH2_COOKIE)
+                    .value(ticket.state().cookie())
+                    .expiry(Date.from(
+                        Instant.now().plus(Duration.ofMinutes(5))
+                    ))
+                    .sameSite(NewCookie.SameSite.STRICT)
+                    .httpOnly(true)
+                    .build()
+            )
+            .build();
     }
 
     @GET
     @Path("/callback/login")
     @RateLimited(bucket = "oauth")
     public RestResponse<TokenResponse> loginCallback(
-            @RestQuery Optional<String> code,
-            @RestQuery Optional<String> state,
-            @RestCookie(OAUTH2_COOKIE) Optional<String> cookie
+        @RestQuery Optional<String> code,
+        @RestQuery Optional<String> state,
+        @RestCookie(OAUTH2_COOKIE) Optional<String> cookie
     ) {
         if (code.isEmpty() || state.isEmpty() || cookie.isEmpty()) {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
@@ -108,34 +108,34 @@ public class OauthResource {
         }
 
         return RestResponse.ResponseBuilder
-                .ok(TokenResponse.fromPair(tokenPair))
-                .cookie(
-                        new NewCookie.Builder(ACCESS_TOKEN_COOKIE)
-                                .value(tokenPair.accessToken().token())
-                                .sameSite(NewCookie.SameSite.STRICT)
-                                .httpOnly(true)
-                                .build(),
-                        new NewCookie.Builder(REFRESH_TOKEN_COOKIE)
-                                .value(tokenPair.refreshToken().token())
-                                .sameSite(NewCookie.SameSite.STRICT)
-                                .httpOnly(true)
-                                .build(),
-                        new NewCookie.Builder(EXPIRES_AT_COOKIE)
-                                .value(Long.toString(tokenPair.accessToken().expiresAt().toEpochMilli()))
-                                .sameSite(NewCookie.SameSite.STRICT)
-                                .httpOnly(true)
-                                .build()
-                )
-                .build();
+            .ok(TokenResponse.fromPair(tokenPair))
+            .cookie(
+                new NewCookie.Builder(ACCESS_TOKEN_COOKIE)
+                    .value(tokenPair.accessToken().token())
+                    .sameSite(NewCookie.SameSite.STRICT)
+                    .httpOnly(true)
+                    .build(),
+                new NewCookie.Builder(REFRESH_TOKEN_COOKIE)
+                    .value(tokenPair.refreshToken().token())
+                    .sameSite(NewCookie.SameSite.STRICT)
+                    .httpOnly(true)
+                    .build(),
+                new NewCookie.Builder(EXPIRES_AT_COOKIE)
+                    .value(Long.toString(tokenPair.accessToken().expiresAt().toEpochMilli()))
+                    .sameSite(NewCookie.SameSite.STRICT)
+                    .httpOnly(true)
+                    .build()
+            )
+            .build();
     }
 
     @GET
     @Path("/callback/connect-account")
     @RateLimited(bucket = "oauth")
     public String connectAccountCallback(
-            @RestQuery Optional<String> code,
-            @RestQuery Optional<String> state,
-            @RestCookie(OAUTH2_COOKIE) Optional<String> cookie
+        @RestQuery Optional<String> code,
+        @RestQuery Optional<String> state,
+        @RestCookie(OAUTH2_COOKIE) Optional<String> cookie
     ) {
         if (code.isEmpty() || state.isEmpty() || cookie.isEmpty()) {
             throw new WebApplicationException(Response.Status.BAD_REQUEST);

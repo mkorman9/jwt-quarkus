@@ -34,9 +34,9 @@ public class GithubOauthService {
         var url = githubAPI.getLoginUrl(state.state());
 
         return OauthTicket.builder()
-                .url(url)
-                .state(state)
-                .build();
+            .url(url)
+            .state(state)
+            .build();
     }
 
     public OauthTicket beginConnectAccount(String accessToken) {
@@ -46,9 +46,9 @@ public class GithubOauthService {
         var url = githubAPI.getConnectAccountUrl(state.state());
 
         return OauthTicket.builder()
-                .url(url)
-                .state(state)
-                .build();
+            .url(url)
+            .state(state)
+            .build();
     }
 
     public TokenPair finishLogin(String code, String state, String cookie) {

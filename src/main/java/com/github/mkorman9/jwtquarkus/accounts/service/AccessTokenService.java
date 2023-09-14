@@ -25,16 +25,16 @@ public class AccessTokenService {
     public AccessToken generate(UUID userId) {
         var expiresAt = Instant.now().plus(ACCESS_TOKEN_DURATION);
         var token = Jwt.issuer("jwt-quarkus")
-                .audience(ACCESS_AUDIENCE)
-                .subject(userId.toString())
-                .expiresAt(expiresAt)
-                .sign();
+            .audience(ACCESS_AUDIENCE)
+            .subject(userId.toString())
+            .expiresAt(expiresAt)
+            .sign();
 
         return AccessToken.builder()
-                .token(token)
-                .subject(userId)
-                .expiresAt(expiresAt)
-                .build();
+            .token(token)
+            .subject(userId)
+            .expiresAt(expiresAt)
+            .build();
     }
 
     public AccessToken validate(String accessToken) {
@@ -47,9 +47,9 @@ public class AccessTokenService {
         }
 
         return AccessToken.builder()
-                .token(accessToken)
-                .subject(UUID.fromString(token.getSubject()))
-                .expiresAt(Instant.ofEpochMilli(token.getExpirationTime()))
-                .build();
+            .token(accessToken)
+            .subject(UUID.fromString(token.getSubject()))
+            .expiresAt(Instant.ofEpochMilli(token.getExpirationTime()))
+            .build();
     }
 }

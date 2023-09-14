@@ -20,9 +20,9 @@ public class TokenFacade {
         var refreshToken = refreshTokenService.generate(accessToken);
 
         return TokenPair.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .build();
+            .accessToken(accessToken)
+            .refreshToken(refreshToken)
+            .build();
     }
 
     public TokenPair refreshToken(String accessToken, String refreshToken) {

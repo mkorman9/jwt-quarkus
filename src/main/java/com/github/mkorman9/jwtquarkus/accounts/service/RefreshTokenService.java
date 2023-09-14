@@ -52,14 +52,14 @@ public class RefreshTokenService {
 
         var accessTokenId = accessToken.getTokenID();
         var refreshToken = Jwt.issuer("jwt-quarkus")
-                .audience(REFRESH_AUDIENCE)
-                .subject(accessTokenId)
-                .expiresAt(ZonedDateTime.now(ZoneOffset.UTC).plus(REFRESH_TOKEN_DURATION).toInstant())
-                .sign();
+            .audience(REFRESH_AUDIENCE)
+            .subject(accessTokenId)
+            .expiresAt(ZonedDateTime.now(ZoneOffset.UTC).plus(REFRESH_TOKEN_DURATION).toInstant())
+            .sign();
 
         return RefreshToken.builder()
-                .token(refreshToken)
-                .build();
+            .token(refreshToken)
+            .build();
     }
 
     public UUID refresh(String accessToken, String refreshToken) {

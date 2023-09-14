@@ -42,16 +42,16 @@ public class OauthStateService {
     public OauthState generateState(String subject) {
         var cookie = oauthCookieService.generateCookie();
         var state = Jwt.issuer("jwt-quarkus")
-                .audience(STATE_AUDIENCE)
-                .subject(subject)
-                .claim("cookie", cookie.cookieHash())
-                .expiresIn(Instant.now().plus(STATE_DURATION).toEpochMilli())
-                .sign();
+            .audience(STATE_AUDIENCE)
+            .subject(subject)
+            .claim("cookie", cookie.cookieHash())
+            .expiresIn(Instant.now().plus(STATE_DURATION).toEpochMilli())
+            .sign();
 
         return OauthState.builder()
-                .state(state)
-                .cookie(cookie.cookie())
-                .build();
+            .state(state)
+            .cookie(cookie.cookie())
+            .build();
     }
 
     public OauthStateValidationResult validateState(String state, String cookie) {
@@ -62,26 +62,26 @@ public class OauthStateService {
         } catch (ParseException e) {
             log.error("Token parsing error", e);
             return OauthStateValidationResult.builder()
-                    .valid(false)
-                    .build();
+                .valid(false)
+                .build();
         }
 
         var cookieHash = token.<String>getClaim("cookie");
         if (cookieHash == null) {
             return OauthStateValidationResult.builder()
-                    .valid(false)
-                    .build();
+                .valid(false)
+                .build();
         }
 
         if (!oauthCookieService.validateCookie(cookie, cookieHash)) {
             return OauthStateValidationResult.builder()
-                    .valid(false)
-                    .build();
+                .valid(false)
+                .build();
         }
 
         return OauthStateValidationResult.builder()
-                .valid(true)
-                .subject(token.getSubject())
-                .build();
+            .valid(true)
+            .subject(token.getSubject())
+            .build();
     }
 }

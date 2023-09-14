@@ -31,9 +31,9 @@ public class AccountController {
         var tokenPair = tokenFacade.generatePair(userId);
 
         return AccountResponse.builder()
-                .id(userId.toString())
-                .token(TokenResponse.fromPair(tokenPair))
-                .build();
+            .id(userId.toString())
+            .token(TokenResponse.fromPair(tokenPair))
+            .build();
     }
 
     @PUT
