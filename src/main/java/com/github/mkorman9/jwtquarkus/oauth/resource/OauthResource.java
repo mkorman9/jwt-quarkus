@@ -76,12 +76,14 @@ public class OauthResource {
         return RestResponse.ResponseBuilder
             .seeOther(ticket.url())
             .cookie(
+                // cookie has to be LAX instead of STRICT because of the firefox bug
+                // https://bugzilla.mozilla.org/show_bug.cgi?id=1465402
                 new NewCookie.Builder(OAUTH2_COOKIE)
                     .value(ticket.state().cookie())
                     .expiry(Date.from(
                         Instant.now().plus(Duration.ofMinutes(5))
                     ))
-                    .sameSite(NewCookie.SameSite.STRICT)
+                    .sameSite(NewCookie.SameSite.LAX)
                     .httpOnly(true)
                     .build()
             )
