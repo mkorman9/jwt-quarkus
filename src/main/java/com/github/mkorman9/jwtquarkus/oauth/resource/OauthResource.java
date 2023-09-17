@@ -13,7 +13,9 @@ import io.quarkiverse.bucket4j.runtime.RateLimited;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.WebApplicationException;
+import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
 import lombok.extern.slf4j.Slf4j;
@@ -28,6 +30,7 @@ import java.util.Optional;
 
 @Path("/oauth")
 @Slf4j
+@Produces(MediaType.APPLICATION_JSON)
 public class OauthResource {
     private static final String OAUTH2_COOKIE = "oauth2_cookie";
     private static final String ACCESS_TOKEN_COOKIE = "access_token";
@@ -141,6 +144,7 @@ public class OauthResource {
     @GET
     @Path("/callback/connect-account")
     @RateLimited(bucket = "oauth")
+    @Produces(MediaType.TEXT_PLAIN)
     public String connectAccountCallback(
         @RestQuery Optional<String> code,
         @RestQuery Optional<String> state,
