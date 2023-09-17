@@ -16,6 +16,7 @@ import jakarta.ws.rs.Path;
 import jakarta.ws.rs.WebApplicationException;
 import jakarta.ws.rs.core.NewCookie;
 import jakarta.ws.rs.core.Response;
+import lombok.extern.slf4j.Slf4j;
 import org.jboss.resteasy.reactive.RestCookie;
 import org.jboss.resteasy.reactive.RestQuery;
 import org.jboss.resteasy.reactive.RestResponse;
@@ -26,6 +27,7 @@ import java.util.Date;
 import java.util.Optional;
 
 @Path("/oauth")
+@Slf4j
 public class OauthResource {
     private static final String OAUTH2_COOKIE = "oauth2_cookie";
     private static final String ACCESS_TOKEN_COOKIE = "access_token";
@@ -44,12 +46,14 @@ public class OauthResource {
         return RestResponse.ResponseBuilder
             .seeOther(ticket.url())
             .cookie(
+                // cookie has to be LAX instead of STRICT because of the firefox bug
+                // https://bugzilla.mozilla.org/show_bug.cgi?id=1465402
                 new NewCookie.Builder(OAUTH2_COOKIE)
                     .value(ticket.state().cookie())
                     .expiry(Date.from(
                         Instant.now().plus(Duration.ofMinutes(5))
                     ))
-                    .sameSite(NewCookie.SameSite.STRICT)
+                    .sameSite(NewCookie.SameSite.LAX)
                     .httpOnly(true)
                     .build()
             )
@@ -63,6 +67,7 @@ public class OauthResource {
         @RestQuery("accessToken") Optional<String> accessToken
     ) {
         if (accessToken.isEmpty()) {
+            log.error("Missing access token");
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
 
@@ -99,6 +104,7 @@ public class OauthResource {
         @RestCookie(OAUTH2_COOKIE) Optional<String> cookie
     ) {
         if (code.isEmpty() || state.isEmpty() || cookie.isEmpty()) {
+            log.error("Missing request params");
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
 
@@ -106,6 +112,7 @@ public class OauthResource {
         try {
             tokenPair = githubOauthService.finishLogin(code.get(), state.get(), cookie.get());
         } catch (OauthStateValidationException | OauthFlowException | GithubAccountNotFoundException e) {
+            log.error("OAuth2 exception");
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         }
 
@@ -140,14 +147,17 @@ public class OauthResource {
         @RestCookie(OAUTH2_COOKIE) Optional<String> cookie
     ) {
         if (code.isEmpty() || state.isEmpty() || cookie.isEmpty()) {
+            log.error("Missing request params");
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
 
         try {
             githubOauthService.finishConnectAccount(code.get(), state.get(), cookie.get());
         } catch (OauthStateValidationException | OauthFlowException e) {
+            log.error("OAuth2 exception");
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         } catch (GithubAccountAlreadyUsedException e) {
+            log.error("Github account already associated with account");
             throw new WebApplicationException(Response.Status.BAD_REQUEST);
         }
 

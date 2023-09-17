@@ -82,7 +82,7 @@ public class GithubOauthService {
             throw new GithubAccountNotFoundException();
         }
 
-        log.info("User {} logged in as {} ({})", userId, userInfo.getClass(), userInfo.email());
+        log.info("User {} logged in as {} ({})", userId, userInfo.name(), userInfo.email());
         return tokenFacade.generatePair(userId);
     }
 
