@@ -9,7 +9,7 @@ import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
 @Path("/")
-@Produces(MediaType.APPLICATION_JSON)
+@Produces(MediaType.TEXT_PLAIN)
 public class HelloWorldResource {
     @GET
     @Authenticated
