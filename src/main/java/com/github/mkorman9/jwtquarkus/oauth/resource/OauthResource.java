@@ -32,7 +32,6 @@ import java.util.Optional;
 @Path("/oauth")
 @Slf4j
 @Produces(MediaType.APPLICATION_JSON)
-@RunOnVirtualThread
 public class OauthResource {
     private static final String OAUTH2_COOKIE = "oauth2_cookie";
     private static final String ACCESS_TOKEN_COOKIE = "access_token";
@@ -103,6 +102,7 @@ public class OauthResource {
     @GET
     @Path("/callback/login")
     @RateLimited(bucket = "oauth")
+    @RunOnVirtualThread
     public RestResponse<TokenResponse> loginCallback(
         @RestQuery Optional<String> code,
         @RestQuery Optional<String> state,
@@ -147,6 +147,7 @@ public class OauthResource {
     @Path("/callback/connect-account")
     @RateLimited(bucket = "oauth")
     @Produces(MediaType.TEXT_PLAIN)
+    @RunOnVirtualThread
     public String connectAccountCallback(
         @RestQuery Optional<String> code,
         @RestQuery Optional<String> state,

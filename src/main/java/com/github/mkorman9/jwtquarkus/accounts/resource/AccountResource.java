@@ -7,7 +7,6 @@ import com.github.mkorman9.jwtquarkus.accounts.exception.RefreshTokenValidationE
 import com.github.mkorman9.jwtquarkus.accounts.exception.TokenRefreshException;
 import com.github.mkorman9.jwtquarkus.accounts.service.AccountService;
 import com.github.mkorman9.jwtquarkus.accounts.service.TokenFacade;
-import io.smallrye.common.annotation.RunOnVirtualThread;
 import io.smallrye.common.constraint.NotNull;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.*;
@@ -17,7 +16,6 @@ import lombok.Builder;
 
 @Path("/account")
 @Produces(MediaType.APPLICATION_JSON)
-@RunOnVirtualThread
 public class AccountResource {
     @Inject
     AccountService accountService;
