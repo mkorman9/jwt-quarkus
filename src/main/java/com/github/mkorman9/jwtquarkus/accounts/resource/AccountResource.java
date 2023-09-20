@@ -18,7 +18,7 @@ import lombok.Builder;
 @Path("/account")
 @Produces(MediaType.APPLICATION_JSON)
 @RunOnVirtualThread
-public class AccountController {
+public class AccountResource {
     @Inject
     AccountService accountService;
 
