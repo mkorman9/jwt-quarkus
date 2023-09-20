@@ -1,3 +1,4 @@
+# FIXME: update base image once it's available
 FROM eclipse-temurin:17-jre
 
 RUN addgroup --system --gid=9999 runner && \
