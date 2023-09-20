@@ -10,6 +10,7 @@ import com.github.mkorman9.jwtquarkus.oauth.exception.OauthFlowException;
 import com.github.mkorman9.jwtquarkus.oauth.exception.OauthStateValidationException;
 import com.github.mkorman9.jwtquarkus.oauth.service.GithubOauthService;
 import io.quarkiverse.bucket4j.runtime.RateLimited;
+import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
@@ -31,6 +32,7 @@ import java.util.Optional;
 @Path("/oauth")
 @Slf4j
 @Produces(MediaType.APPLICATION_JSON)
+@RunOnVirtualThread
 public class OauthResource {
     private static final String OAUTH2_COOKIE = "oauth2_cookie";
     private static final String ACCESS_TOKEN_COOKIE = "access_token";
