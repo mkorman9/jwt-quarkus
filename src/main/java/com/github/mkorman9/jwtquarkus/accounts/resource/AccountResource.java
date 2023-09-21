@@ -7,8 +7,10 @@ import com.github.mkorman9.jwtquarkus.accounts.exception.RefreshTokenValidationE
 import com.github.mkorman9.jwtquarkus.accounts.exception.TokenRefreshException;
 import com.github.mkorman9.jwtquarkus.accounts.service.AccountService;
 import com.github.mkorman9.jwtquarkus.accounts.service.TokenFacade;
-import io.smallrye.common.constraint.NotNull;
 import jakarta.inject.Inject;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import jakarta.ws.rs.*;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
@@ -38,7 +40,7 @@ public class AccountResource {
     @PUT
     @Path("/token/refresh")
     @Consumes(MediaType.APPLICATION_JSON)
-    public TokenResponse refreshToken(@NotNull TokenRefreshPayload payload) {
+    public TokenResponse refreshToken(@NotNull @Valid TokenRefreshPayload payload) {
         TokenPair tokenPair;
         try {
             tokenPair = tokenFacade.refreshToken(payload.accessToken(), payload.refreshToken());
@@ -50,8 +52,8 @@ public class AccountResource {
     }
 
     public record TokenRefreshPayload(
-        String accessToken,
-        String refreshToken
+        @NotBlank String accessToken,
+        @NotBlank String refreshToken
     ) {
     }
 

@@ -12,6 +12,7 @@ import com.github.mkorman9.jwtquarkus.oauth.service.GithubOauthService;
 import io.quarkiverse.bucket4j.runtime.RateLimited;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.inject.Inject;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;
@@ -27,7 +28,6 @@ import org.jboss.resteasy.reactive.RestResponse;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Date;
-import java.util.Optional;
 
 @Path("/oauth")
 @Slf4j
@@ -68,17 +68,13 @@ public class OauthResource {
     @Path("/connect-account")
     @RateLimited(bucket = "oauth")
     public RestResponse<Object> connectAccount(
-        @RestQuery("accessToken") Optional<String> accessToken
+        @RestQuery("accessToken") @NotBlank String accessToken
     ) {
-        if (accessToken.isEmpty()) {
-            log.error("Missing access token");
-            throw new WebApplicationException(Response.Status.BAD_REQUEST);
-        }
-
         OauthTicket ticket;
         try {
-            ticket = githubOauthService.beginConnectAccount(accessToken.get());
+            ticket = githubOauthService.beginConnectAccount(accessToken);
         } catch (AccessTokenValidationException e) {
+            log.error("Invalid access token");
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         }
 
@@ -104,18 +100,13 @@ public class OauthResource {
     @RateLimited(bucket = "oauth")
     @RunOnVirtualThread
     public RestResponse<TokenResponse> loginCallback(
-        @RestQuery Optional<String> code,
-        @RestQuery Optional<String> state,
-        @RestCookie(OAUTH2_COOKIE) Optional<String> cookie
+        @RestQuery @NotBlank String code,
+        @RestQuery @NotBlank String state,
+        @RestCookie(OAUTH2_COOKIE) @NotBlank String cookie
     ) {
-        if (code.isEmpty() || state.isEmpty() || cookie.isEmpty()) {
-            log.error("Missing request params");
-            throw new WebApplicationException(Response.Status.BAD_REQUEST);
-        }
-
         TokenPair tokenPair;
         try {
-            tokenPair = githubOauthService.finishLogin(code.get(), state.get(), cookie.get());
+            tokenPair = githubOauthService.finishLogin(code, state, cookie);
         } catch (OauthStateValidationException | OauthFlowException | GithubAccountNotFoundException e) {
             log.error("OAuth2 exception");
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
@@ -149,17 +140,12 @@ public class OauthResource {
     @Produces(MediaType.TEXT_PLAIN)
     @RunOnVirtualThread
     public String connectAccountCallback(
-        @RestQuery Optional<String> code,
-        @RestQuery Optional<String> state,
-        @RestCookie(OAUTH2_COOKIE) Optional<String> cookie
+        @RestQuery @NotBlank String code,
+        @RestQuery @NotBlank String state,
+        @RestCookie(OAUTH2_COOKIE) @NotBlank String cookie
     ) {
-        if (code.isEmpty() || state.isEmpty() || cookie.isEmpty()) {
-            log.error("Missing request params");
-            throw new WebApplicationException(Response.Status.BAD_REQUEST);
-        }
-
         try {
-            githubOauthService.finishConnectAccount(code.get(), state.get(), cookie.get());
+            githubOauthService.finishConnectAccount(code, state, cookie);
         } catch (OauthStateValidationException | OauthFlowException e) {
             log.error("OAuth2 exception");
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
