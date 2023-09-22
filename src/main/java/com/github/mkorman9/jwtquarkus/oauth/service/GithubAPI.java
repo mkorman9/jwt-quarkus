@@ -38,10 +38,10 @@ public class GithubAPI {
 
     @Inject
     public GithubAPI(
-        @ConfigProperty(name = "oauth2.clientId") String clientId,
-        @ConfigProperty(name = "oauth2.clientSecret") String clientSecret,
-        @ConfigProperty(name = "oauth2.loginRedirectUrl") String loginRedirectUrl,
-        @ConfigProperty(name = "oauth2.connectAccountRedirectUrl") String connectAccountRedirectUrl
+        @ConfigProperty(name = "oauth2.client-id") String clientId,
+        @ConfigProperty(name = "oauth2.client-secret") String clientSecret,
+        @ConfigProperty(name = "oauth2.login-redirect-url") String loginRedirectUrl,
+        @ConfigProperty(name = "oauth2.connect-account-redirect-url") String connectAccountRedirectUrl
     ) {
         this.loginService = new ServiceBuilder(clientId)
             .apiSecret(clientSecret)
