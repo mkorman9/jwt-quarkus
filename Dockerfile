@@ -1,5 +1,4 @@
-# FIXME: update base image once it's available
-FROM amazoncorretto:17
+FROM amazoncorretto:21
 
 COPY --chown=nobody:nobody target/quarkus-app/lib/ /deployment/lib/
 COPY --chown=nobody:nobody target/quarkus-app/*.jar /deployment/
