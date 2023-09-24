@@ -23,13 +23,13 @@ public class AccountService {
         var account = UuidCreator.getTimeOrderedEpoch();
         ACCOUNTS.put(account, true);
 
-        eventBus.send("audit", new AuditEvent("REGISTER_ACCOUNT", account.toString()));
+        eventBus.send(AuditEvent.CHANNEL_ADDRESS, new AuditEvent("REGISTER_ACCOUNT", account.toString()));
 
         return account;
     }
 
     public void connectGithubAccount(GithubUserInfo userInfo, UUID id) {
-        eventBus.send("audit", new AuditEvent("CONNECT_GITHUB_ACCOUNT", id.toString()));
+        eventBus.send(AuditEvent.CHANNEL_ADDRESS, new AuditEvent("CONNECT_GITHUB_ACCOUNT", id.toString()));
 
         GITHUB_CONNECTIONS.put(userInfo.id(), id);
     }

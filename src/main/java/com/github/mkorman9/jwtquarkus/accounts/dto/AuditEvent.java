@@ -4,4 +4,5 @@ public record AuditEvent(
     String action,
     String subject
 ) {
+    public static final String CHANNEL_ADDRESS = "audit";
 }
