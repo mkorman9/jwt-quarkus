@@ -118,6 +118,7 @@
         <version>3.11.0</version>
         <configuration>
           <compilerArgs>
+            <arg>-proc:full</arg>
             <arg>-parameters</arg>
           </compilerArgs>
         </configuration>
