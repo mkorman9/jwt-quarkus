@@ -1,6 +1,5 @@
 package com.github.mkorman9.jwtquarkus.token;
 
-import com.github.mkorman9.jwtquarkus.token.AccessToken;
 import com.github.mkorman9.jwtquarkus.token.exception.AccessTokenValidationException;
 import io.smallrye.jwt.auth.principal.JWTParser;
 import io.smallrye.jwt.auth.principal.ParseException;

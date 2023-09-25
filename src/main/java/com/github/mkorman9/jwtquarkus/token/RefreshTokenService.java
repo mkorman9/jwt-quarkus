@@ -1,7 +1,5 @@
 package com.github.mkorman9.jwtquarkus.token;
 
-import com.github.mkorman9.jwtquarkus.token.AccessToken;
-import com.github.mkorman9.jwtquarkus.token.RefreshToken;
 import com.github.mkorman9.jwtquarkus.token.exception.AccessTokenValidationException;
 import com.github.mkorman9.jwtquarkus.token.exception.RefreshTokenValidationException;
 import com.github.mkorman9.jwtquarkus.token.exception.TokenRefreshException;
