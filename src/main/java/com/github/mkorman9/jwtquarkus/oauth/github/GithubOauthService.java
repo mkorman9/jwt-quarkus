@@ -1,13 +1,13 @@
 package com.github.mkorman9.jwtquarkus.oauth.github;
 
-import com.github.mkorman9.jwtquarkus.oauth.OauthStateService;
-import com.github.mkorman9.jwtquarkus.token.TokenPair;
 import com.github.mkorman9.jwtquarkus.account.AccountService;
-import com.github.mkorman9.jwtquarkus.token.TokenFacade;
+import com.github.mkorman9.jwtquarkus.oauth.OauthStateService;
 import com.github.mkorman9.jwtquarkus.oauth.OauthTicket;
+import com.github.mkorman9.jwtquarkus.oauth.exception.OauthStateValidationException;
 import com.github.mkorman9.jwtquarkus.oauth.github.exception.GithubAccountAlreadyUsedException;
 import com.github.mkorman9.jwtquarkus.oauth.github.exception.GithubAccountNotFoundException;
-import com.github.mkorman9.jwtquarkus.oauth.exception.OauthStateValidationException;
+import com.github.mkorman9.jwtquarkus.token.TokenPair;
+import com.github.mkorman9.jwtquarkus.token.TokenService;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +21,7 @@ public class GithubOauthService {
     OauthStateService oauthStateService;
 
     @Inject
-    TokenFacade tokenFacade;
+    TokenService tokenService;
 
     @Inject
     GithubAPI githubAPI;
@@ -40,7 +40,7 @@ public class GithubOauthService {
     }
 
     public OauthTicket beginConnectAccount(String accessToken) {
-        var token = tokenFacade.validateAccessToken(accessToken);
+        var token = tokenService.validateAccessToken(accessToken);
 
         var state = oauthStateService.generateState(token.subject().toString());
         var url = githubAPI.getConnectAccountUrl(state.state());
@@ -83,7 +83,7 @@ public class GithubOauthService {
         }
 
         log.info("User {} logged in as {} ({})", userId, userInfo.name(), userInfo.email());
-        return tokenFacade.generatePair(userId);
+        return tokenService.generatePair(userId);
     }
 
     private void connectAccount(GithubUserInfo userInfo, UUID userId) {

@@ -1,8 +1,8 @@
 package com.github.mkorman9.jwtquarkus.account;
 
-import com.github.mkorman9.jwtquarkus.token.TokenFacade;
 import com.github.mkorman9.jwtquarkus.token.TokenPair;
 import com.github.mkorman9.jwtquarkus.token.TokenResponse;
+import com.github.mkorman9.jwtquarkus.token.TokenService;
 import com.github.mkorman9.jwtquarkus.token.exception.TokenRefreshException;
 import com.github.mkorman9.jwtquarkus.token.exception.TokenValidationException;
 import jakarta.inject.Inject;
@@ -26,13 +26,13 @@ public class AccountResource {
     AccountService accountService;
 
     @Inject
-    TokenFacade tokenFacade;
+    TokenService tokenService;
 
     @GET
     @Path("/new")
     public AccountResponse newAccount() {
         var userId = accountService.registerAccount();
-        var tokenPair = tokenFacade.generatePair(userId);
+        var tokenPair = tokenService.generatePair(userId);
 
         return AccountResponse.builder()
             .id(userId.toString())
@@ -46,7 +46,7 @@ public class AccountResource {
     public TokenResponse refreshToken(@NotNull @Valid TokenRefreshPayload payload) {
         TokenPair tokenPair;
         try {
-            tokenPair = tokenFacade.refreshToken(payload.accessToken(), payload.refreshToken());
+            tokenPair = tokenService.refreshToken(payload.accessToken(), payload.refreshToken());
         } catch (TokenValidationException | TokenRefreshException e) {
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         }
