@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.closeTo;
+import static org.hamcrest.Matchers.is;
 
 @QuarkusTest
 class WeatherResourceTest {
@@ -44,8 +44,8 @@ class WeatherResourceTest {
             .when().get("/weather")
             .then()
             .statusCode(200)
-            .body("temperature", closeTo(temperature, 0.1))
-            .body("windSpeed", closeTo(windSpeed, 0.1))
-            .body("windDirection", closeTo(windDirection, 0.1));
+            .body("temperature", is(temperature))
+            .body("windSpeed", is(windSpeed))
+            .body("windDirection", is(windDirection));
     }
 }
