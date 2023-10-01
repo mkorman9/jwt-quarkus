@@ -9,6 +9,8 @@ import static org.hamcrest.Matchers.is;
 
 @QuarkusTest
 class HelloWorldResourceTest {
+    private static final String SUBJECT = "test";
+
     @Test
     public void testHelloWorldAnonymousAccess() {
         given()
@@ -18,12 +20,12 @@ class HelloWorldResourceTest {
     }
 
     @Test
-    @TestSecurity(user = "test")
+    @TestSecurity(user = SUBJECT)
     public void testHelloWorld() {
         given()
             .when().get("/")
             .then()
             .statusCode(200)
-            .body(is("Hello test"));
+            .body(is("Hello " + SUBJECT));
     }
 }
