@@ -2,6 +2,8 @@ package com.github.mkorman9.jwtquarkus.oauth;
 
 import com.github.mkorman9.jwtquarkus.account.AccountResource;
 import com.github.mkorman9.jwtquarkus.oauth.github.GithubAPI;
+import com.github.mkorman9.jwtquarkus.oauth.github.GithubUserInfo;
+import com.github.scribejava.core.model.OAuth2AccessToken;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import jakarta.inject.Inject;
@@ -82,5 +84,49 @@ class OauthResourceTest {
             .get("/oauth/connect-account")
             .then()
             .statusCode(401);
+    }
+
+    @Test
+    public void testConnectAccountCallback() {
+        final var code = "123456789";
+        final var githubAccessToken = new OAuth2AccessToken("access_token");
+
+        Mockito.when(githubAPI.getConnectAccountUrl(Mockito.anyString())).thenAnswer(invocation -> {
+            var state = (String) invocation.getArgument(0);
+            return URI.create("https://example.com/?state=" + state);
+        });
+        Mockito.when(githubAPI.retrieveAccessToken(Mockito.eq(code))).thenReturn(githubAccessToken);
+        Mockito.when(githubAPI.retrieveUserInfo(Mockito.eq(githubAccessToken))).thenReturn(
+            GithubUserInfo.builder()
+                .id(12345)
+                .email("user@example.com")
+                .build()
+        );
+
+        var newAccountResponse = given()
+            .when().get("/account/new")
+            .then()
+            .statusCode(200)
+            .extract().body().as(AccountResource.AccountResponse.class);
+        var redirectResponse = given()
+            .redirects().follow(false)
+            .when()
+            .queryParam("accessToken", newAccountResponse.token().accessToken())
+            .get("/oauth/connect-account")
+            .then()
+            .statusCode(303);
+
+        var location = URI.create(redirectResponse.extract().header("Location"));
+        var cookie = redirectResponse.extract().cookie("oauth2_cookie");
+        var state = URLEncodedUtils.parse(location, Charset.defaultCharset()).get(0).getValue();
+
+        given()
+            .when()
+            .queryParam("code", code)
+            .queryParam("state", state)
+            .cookie("oauth2_cookie", cookie)
+            .get("/oauth/callback/connect-account")
+            .then()
+            .statusCode(200);
     }
 }
