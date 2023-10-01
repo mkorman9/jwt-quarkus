@@ -4,7 +4,6 @@ import com.github.mkorman9.jwtquarkus.account.AccountResource;
 import com.github.mkorman9.jwtquarkus.account.AccountService;
 import com.github.mkorman9.jwtquarkus.oauth.github.GithubAPI;
 import com.github.mkorman9.jwtquarkus.oauth.github.GithubUserInfo;
-import com.github.mkorman9.jwtquarkus.token.TokenResponse;
 import com.github.scribejava.core.model.OAuth2AccessToken;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
