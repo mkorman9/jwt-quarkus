@@ -59,7 +59,7 @@ public class OauthStateService {
         try {
             token = jwtParser.parse(state, authContextInfo);
         } catch (ParseException e) {
-            log.error("Token parsing error", e);
+            log.error("State parsing error");
             return OauthStateValidationResult.builder()
                 .valid(false)
                 .build();

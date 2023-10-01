@@ -93,6 +93,18 @@ class OauthResourceTest {
     }
 
     @Test
+    public void testLoginCallbackInvalidParams() {
+        given()
+            .when()
+            .queryParam("code", "invalid_code")
+            .queryParam("state", "invalid_state")
+            .cookie("oauth2_cookie", "invalid_cookie")
+            .get("/oauth/callback/login")
+            .then()
+            .statusCode(401);
+    }
+
+    @Test
     public void testConnectAccount() {
         Mockito.when(githubAPI.getConnectAccountUrl(Mockito.anyString())).thenAnswer(invocation -> {
             var state = (String) invocation.getArgument(0);
