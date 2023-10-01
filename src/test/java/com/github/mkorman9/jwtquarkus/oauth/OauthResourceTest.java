@@ -12,6 +12,7 @@ import java.net.URI;
 import java.nio.charset.Charset;
 
 import static io.restassured.RestAssured.given;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @QuarkusTest
 class OauthResourceTest {
@@ -38,6 +39,7 @@ class OauthResourceTest {
         var cookie = redirectResponse.extract().cookie("oauth2_cookie");
         var state = URLEncodedUtils.parse(location, Charset.defaultCharset()).get(0).getValue();
 
-        oauthStateService.validateState(state, cookie);
+        var isValid = oauthStateService.validateState(state, cookie).valid();
+        assertThat(isValid).isTrue();
     }
 }
