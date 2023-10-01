@@ -7,10 +7,12 @@ import com.github.mkorman9.jwtquarkus.oauth.github.GithubUserInfo;
 import com.github.scribejava.core.model.OAuth2AccessToken;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
+import io.restassured.response.ValidatableResponse;
 import jakarta.inject.Inject;
 import org.apache.http.client.utils.URLEncodedUtils;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.mockito.stubbing.Answer;
 
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -32,21 +34,16 @@ class OauthResourceTest {
 
     @Test
     public void testLogin() {
-        Mockito.when(githubAPI.getLoginUrl(Mockito.anyString())).thenAnswer(invocation -> {
-            var state = (String) invocation.getArgument(0);
-            return URI.create("https://example.com/?state=" + state);
-        });
+        Mockito.when(githubAPI.getLoginUrl(Mockito.anyString())).thenAnswer(mockRedirectUrl());
 
         var redirectResponse = given()
             .redirects().follow(false)
             .when().get("/oauth/login")
             .then()
             .statusCode(303);
-        var location = URI.create(redirectResponse.extract().header("Location"));
-        var cookie = redirectResponse.extract().cookie("oauth2_cookie");
-        var state = URLEncodedUtils.parse(location, Charset.defaultCharset()).get(0).getValue();
+        var redirectParams = extractRedirectParams(redirectResponse);
 
-        var isValid = oauthStateService.validateState(state, cookie).valid();
+        var isValid = oauthStateService.validateState(redirectParams.state(), redirectParams.cookie()).valid();
         assertThat(isValid).isTrue();
     }
 
@@ -59,10 +56,7 @@ class OauthResourceTest {
             .email("user@example.com")
             .build();
 
-        Mockito.when(githubAPI.getLoginUrl(Mockito.anyString())).thenAnswer(invocation -> {
-            var state = (String) invocation.getArgument(0);
-            return URI.create("https://example.com/?state=" + state);
-        });
+        Mockito.when(githubAPI.getLoginUrl(Mockito.anyString())).thenAnswer(mockRedirectUrl());
         Mockito.when(githubAPI.retrieveAccessToken(Mockito.eq(code))).thenReturn(githubAccessToken);
         Mockito.when(githubAPI.retrieveUserInfo(Mockito.eq(githubAccessToken))).thenReturn(githubUserInfo);
 
@@ -78,15 +72,13 @@ class OauthResourceTest {
             .when().get("/oauth/login")
             .then()
             .statusCode(303);
-        var location = URI.create(redirectResponse.extract().header("Location"));
-        var cookie = redirectResponse.extract().cookie("oauth2_cookie");
-        var state = URLEncodedUtils.parse(location, Charset.defaultCharset()).get(0).getValue();
+        var redirectParams = extractRedirectParams(redirectResponse);
 
         given()
             .when()
             .queryParam("code", code)
-            .queryParam("state", state)
-            .cookie("oauth2_cookie", cookie)
+            .queryParam("state", redirectParams.state())
+            .cookie("oauth2_cookie", redirectParams.cookie())
             .get("/oauth/callback/login")
             .then()
             .statusCode(200);
@@ -106,10 +98,7 @@ class OauthResourceTest {
 
     @Test
     public void testConnectAccount() {
-        Mockito.when(githubAPI.getConnectAccountUrl(Mockito.anyString())).thenAnswer(invocation -> {
-            var state = (String) invocation.getArgument(0);
-            return URI.create("https://example.com/?state=" + state);
-        });
+        Mockito.when(githubAPI.getConnectAccountUrl(Mockito.anyString())).thenAnswer(mockRedirectUrl());
 
         var newAccountResponse = given()
             .when().get("/account/new")
@@ -124,11 +113,9 @@ class OauthResourceTest {
             .get("/oauth/connect-account")
             .then()
             .statusCode(303);
-        var location = URI.create(redirectResponse.extract().header("Location"));
-        var cookie = redirectResponse.extract().cookie("oauth2_cookie");
-        var state = URLEncodedUtils.parse(location, Charset.defaultCharset()).get(0).getValue();
+        var redirectParams = extractRedirectParams(redirectResponse);
 
-        var stateValidation = oauthStateService.validateState(state, cookie);
+        var stateValidation = oauthStateService.validateState(redirectParams.state(), redirectParams.cookie());
         assertThat(stateValidation.valid()).isTrue();
         assertThat(stateValidation.subject()).isEqualTo(newAccountResponse.id());
     }
@@ -149,10 +136,7 @@ class OauthResourceTest {
         final var code = "123456789";
         final var githubAccessToken = new OAuth2AccessToken("access_token");
 
-        Mockito.when(githubAPI.getConnectAccountUrl(Mockito.anyString())).thenAnswer(invocation -> {
-            var state = (String) invocation.getArgument(0);
-            return URI.create("https://example.com/?state=" + state);
-        });
+        Mockito.when(githubAPI.getConnectAccountUrl(Mockito.anyString())).thenAnswer(mockRedirectUrl());
         Mockito.when(githubAPI.retrieveAccessToken(Mockito.eq(code))).thenReturn(githubAccessToken);
         Mockito.when(githubAPI.retrieveUserInfo(Mockito.eq(githubAccessToken))).thenReturn(
             GithubUserInfo.builder()
@@ -174,17 +158,36 @@ class OauthResourceTest {
             .get("/oauth/connect-account")
             .then()
             .statusCode(303);
-        var location = URI.create(redirectResponse.extract().header("Location"));
-        var cookie = redirectResponse.extract().cookie("oauth2_cookie");
-        var state = URLEncodedUtils.parse(location, Charset.defaultCharset()).get(0).getValue();
+        var redirectParams = extractRedirectParams(redirectResponse);
 
         given()
             .when()
             .queryParam("code", code)
-            .queryParam("state", state)
-            .cookie("oauth2_cookie", cookie)
+            .queryParam("state", redirectParams.state())
+            .cookie("oauth2_cookie", redirectParams.cookie())
             .get("/oauth/callback/connect-account")
             .then()
             .statusCode(200);
+    }
+
+    private Answer<?> mockRedirectUrl() {
+        return invocation -> {
+            var state = (String) invocation.getArgument(0);
+            return URI.create("https://example.com/?state=" + state);
+        };
+    }
+
+    private RedirectParams extractRedirectParams(ValidatableResponse response) {
+        var location = URI.create(response.extract().header("Location"));
+        return new RedirectParams(
+            response.extract().cookie("oauth2_cookie"),
+            URLEncodedUtils.parse(location, Charset.defaultCharset()).get(0).getValue()
+        );
+    }
+
+    private record RedirectParams(
+        String cookie,
+        String state
+    ) {
     }
 }
