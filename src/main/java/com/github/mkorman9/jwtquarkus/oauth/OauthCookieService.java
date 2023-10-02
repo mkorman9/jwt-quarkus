@@ -1,13 +1,13 @@
 package com.github.mkorman9.jwtquarkus.oauth;
 
 import jakarta.enterprise.context.ApplicationScoped;
-import jakarta.xml.bind.DatatypeConverter;
 import lombok.Builder;
 import lombok.SneakyThrows;
 
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.SecureRandom;
+import java.util.Base64;
 
 @ApplicationScoped
 public class OauthCookieService {
@@ -15,6 +15,7 @@ public class OauthCookieService {
     private static final int COOKIE_LENGTH = 16;
     private static final SecureRandom RANDOM = selectSecureRandom();
     private static final MessageDigest DIGEST = createMessageDigest();
+    private static final Base64.Encoder HASH_ENCODER = Base64.getEncoder();
 
     public OauthCookie generateCookie() {
         var cookieValue = generateRandomCookie();
@@ -39,7 +40,7 @@ public class OauthCookieService {
     }
 
     private String hashCookie(String value) {
-        return DatatypeConverter.printHexBinary(
+        return HASH_ENCODER.encodeToString(
             DIGEST.digest(value.getBytes(StandardCharsets.US_ASCII))
         );
     }
