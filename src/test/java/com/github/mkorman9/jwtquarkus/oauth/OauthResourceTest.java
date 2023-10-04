@@ -53,6 +53,7 @@ class OauthResourceTest {
         final var githubAccessToken = new OAuth2AccessToken("access_token");
         final var githubUserInfo = GithubUserInfo.builder()
             .id(54321)
+            .name("Test User")
             .email("user@example.com")
             .build();
 
@@ -141,6 +142,7 @@ class OauthResourceTest {
         Mockito.when(githubAPI.retrieveUserInfo(Mockito.eq(githubAccessToken))).thenReturn(
             GithubUserInfo.builder()
                 .id(12345)
+                .name("Test User")
                 .email("user@example.com")
                 .build()
         );
