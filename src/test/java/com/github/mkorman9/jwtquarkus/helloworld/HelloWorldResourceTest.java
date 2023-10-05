@@ -14,7 +14,7 @@ class HelloWorldResourceTest {
     @Test
     public void testHelloWorldAnonymousAccess() {
         given()
-            .when().get("/")
+            .when().get("/hello")
             .then()
             .statusCode(401);
     }
@@ -23,7 +23,7 @@ class HelloWorldResourceTest {
     @TestSecurity(user = SUBJECT)
     public void testHelloWorld() {
         given()
-            .when().get("/")
+            .when().get("/hello")
             .then()
             .statusCode(200)
             .body(is("Hello " + SUBJECT));

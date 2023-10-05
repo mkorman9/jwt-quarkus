@@ -8,7 +8,7 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import org.eclipse.microprofile.jwt.JsonWebToken;
 
-@Path("/")
+@Path("/hello")
 @Produces(MediaType.TEXT_PLAIN)
 public class HelloWorldResource {
     @GET
