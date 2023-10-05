@@ -1,6 +1,5 @@
 package com.github.mkorman9.jwtquarkus.account;
 
-import com.github.mkorman9.jwtquarkus.token.TokenPair;
 import com.github.mkorman9.jwtquarkus.token.TokenResponse;
 import com.github.mkorman9.jwtquarkus.token.TokenService;
 import com.github.mkorman9.jwtquarkus.token.exception.TokenRefreshException;
@@ -44,14 +43,12 @@ public class AccountResource {
     @Path("/token/refresh")
     @Consumes(MediaType.APPLICATION_JSON)
     public TokenResponse refreshToken(@NotNull @Valid TokenRefreshPayload payload) {
-        TokenPair tokenPair;
         try {
-            tokenPair = tokenService.refreshToken(payload.accessToken(), payload.refreshToken());
+            var tokenPair = tokenService.refreshToken(payload.accessToken(), payload.refreshToken());
+            return TokenResponse.fromPair(tokenPair);
         } catch (TokenValidationException | TokenRefreshException e) {
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         }
-
-        return TokenResponse.fromPair(tokenPair);
     }
 
     public record TokenRefreshPayload(

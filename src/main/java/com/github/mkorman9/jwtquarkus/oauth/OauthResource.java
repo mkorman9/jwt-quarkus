@@ -1,13 +1,12 @@
 package com.github.mkorman9.jwtquarkus.oauth;
 
-import com.github.mkorman9.jwtquarkus.token.TokenPair;
-import com.github.mkorman9.jwtquarkus.token.TokenResponse;
-import com.github.mkorman9.jwtquarkus.token.exception.AccessTokenValidationException;
-import com.github.mkorman9.jwtquarkus.oauth.github.exception.GithubAccountAlreadyUsedException;
-import com.github.mkorman9.jwtquarkus.oauth.github.exception.GithubAccountNotFoundException;
 import com.github.mkorman9.jwtquarkus.oauth.exception.OauthFlowException;
 import com.github.mkorman9.jwtquarkus.oauth.exception.OauthStateValidationException;
 import com.github.mkorman9.jwtquarkus.oauth.github.GithubOauthService;
+import com.github.mkorman9.jwtquarkus.oauth.github.exception.GithubAccountAlreadyUsedException;
+import com.github.mkorman9.jwtquarkus.oauth.github.exception.GithubAccountNotFoundException;
+import com.github.mkorman9.jwtquarkus.token.TokenResponse;
+import com.github.mkorman9.jwtquarkus.token.exception.AccessTokenValidationException;
 import io.quarkiverse.bucket4j.runtime.RateLimited;
 import io.smallrye.common.annotation.RunOnVirtualThread;
 import jakarta.inject.Inject;
@@ -69,29 +68,28 @@ public class OauthResource {
     public RestResponse<Object> connectAccount(
         @RestQuery("accessToken") @NotBlank String accessToken
     ) {
-        OauthTicket ticket;
         try {
-            ticket = githubOauthService.beginConnectAccount(accessToken);
+            var ticket = githubOauthService.beginConnectAccount(accessToken);
+
+            return RestResponse.ResponseBuilder
+                .seeOther(ticket.url())
+                .cookie(
+                    // cookie has to be LAX instead of STRICT because of the firefox bug
+                    // https://bugzilla.mozilla.org/show_bug.cgi?id=1465402
+                    new NewCookie.Builder(OAUTH2_COOKIE)
+                        .value(ticket.state().cookie())
+                        .expiry(Date.from(
+                            Instant.now().plus(Duration.ofMinutes(5))
+                        ))
+                        .sameSite(NewCookie.SameSite.LAX)
+                        .httpOnly(true)
+                        .build()
+                )
+                .build();
         } catch (AccessTokenValidationException e) {
             log.error("Invalid access token");
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         }
-
-        return RestResponse.ResponseBuilder
-            .seeOther(ticket.url())
-            .cookie(
-                // cookie has to be LAX instead of STRICT because of the firefox bug
-                // https://bugzilla.mozilla.org/show_bug.cgi?id=1465402
-                new NewCookie.Builder(OAUTH2_COOKIE)
-                    .value(ticket.state().cookie())
-                    .expiry(Date.from(
-                        Instant.now().plus(Duration.ofMinutes(5))
-                    ))
-                    .sameSite(NewCookie.SameSite.LAX)
-                    .httpOnly(true)
-                    .build()
-            )
-            .build();
     }
 
     @GET
@@ -103,34 +101,33 @@ public class OauthResource {
         @RestQuery @NotBlank String state,
         @RestCookie(OAUTH2_COOKIE) @NotBlank String cookie
     ) {
-        TokenPair tokenPair;
         try {
-            tokenPair = githubOauthService.finishLogin(code, state, cookie);
+            var tokenPair = githubOauthService.finishLogin(code, state, cookie);
+
+            return RestResponse.ResponseBuilder
+                .ok(TokenResponse.fromPair(tokenPair))
+                .cookie(
+                    new NewCookie.Builder(ACCESS_TOKEN_COOKIE)
+                        .value(tokenPair.accessToken().token())
+                        .sameSite(NewCookie.SameSite.STRICT)
+                        .httpOnly(true)
+                        .build(),
+                    new NewCookie.Builder(REFRESH_TOKEN_COOKIE)
+                        .value(tokenPair.refreshToken().token())
+                        .sameSite(NewCookie.SameSite.STRICT)
+                        .httpOnly(true)
+                        .build(),
+                    new NewCookie.Builder(EXPIRES_AT_COOKIE)
+                        .value(Long.toString(tokenPair.accessToken().expiresAt().toEpochMilli()))
+                        .sameSite(NewCookie.SameSite.STRICT)
+                        .httpOnly(true)
+                        .build()
+                )
+                .build();
         } catch (OauthStateValidationException | OauthFlowException | GithubAccountNotFoundException e) {
             log.error("OAuth2 exception");
             throw new WebApplicationException(Response.Status.UNAUTHORIZED);
         }
-
-        return RestResponse.ResponseBuilder
-            .ok(TokenResponse.fromPair(tokenPair))
-            .cookie(
-                new NewCookie.Builder(ACCESS_TOKEN_COOKIE)
-                    .value(tokenPair.accessToken().token())
-                    .sameSite(NewCookie.SameSite.STRICT)
-                    .httpOnly(true)
-                    .build(),
-                new NewCookie.Builder(REFRESH_TOKEN_COOKIE)
-                    .value(tokenPair.refreshToken().token())
-                    .sameSite(NewCookie.SameSite.STRICT)
-                    .httpOnly(true)
-                    .build(),
-                new NewCookie.Builder(EXPIRES_AT_COOKIE)
-                    .value(Long.toString(tokenPair.accessToken().expiresAt().toEpochMilli()))
-                    .sameSite(NewCookie.SameSite.STRICT)
-                    .httpOnly(true)
-                    .build()
-            )
-            .build();
     }
 
     @GET
