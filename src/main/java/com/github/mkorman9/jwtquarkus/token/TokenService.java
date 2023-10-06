@@ -76,19 +76,17 @@ public class TokenService {
     }
 
     public AccessToken validateAccessToken(String accessToken) {
-        JsonWebToken token;
-
         try {
-            token = jwtParser.parse(accessToken);
+            var token = jwtParser.parse(accessToken);
+
+            return AccessToken.builder()
+                .token(accessToken)
+                .subject(UUID.fromString(token.getSubject()))
+                .expiresAt(Instant.ofEpochMilli(token.getExpirationTime()))
+                .build();
         } catch (ParseException e) {
             throw new AccessTokenValidationException(e);
         }
-
-        return AccessToken.builder()
-            .token(accessToken)
-            .subject(UUID.fromString(token.getSubject()))
-            .expiresAt(Instant.ofEpochMilli(token.getExpirationTime()))
-            .build();
     }
 
     private AccessToken generateAccessToken(UUID userId) {
