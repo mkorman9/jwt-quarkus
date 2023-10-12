@@ -1,4 +1,4 @@
-FROM azul/zulu-openjdk-debian:21-jre-headless
+FROM eclipse-temurin:21-jre
 
 COPY --chown=nobody:nogroup target/quarkus-app/lib/ /deployment/lib/
 COPY --chown=nobody:nogroup target/quarkus-app/*.jar /deployment/
