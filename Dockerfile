@@ -11,4 +11,4 @@ WORKDIR /
 EXPOSE 8080
 EXPOSE 8443
 
-CMD [ "java", "-jar", "/deployment/quarkus-run.jar" ]
+CMD exec java ${JAVA_OPTS} -jar /deployment/quarkus-run.jar
